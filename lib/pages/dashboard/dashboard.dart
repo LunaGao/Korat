@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/user_api.dart';
+import 'package:korat/config/platform_config.dart';
+import 'package:korat/models/platform.dart';
 import 'package:korat/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,6 +18,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
   bool loading = true;
   bool emailVerified = true;
   bool emptyPlatform = false;
+  PlatformModel platformModel = PlatformModel();
   String email = '';
 
   @override
@@ -39,6 +42,15 @@ class _DashBoardPageState extends State<DashBoardPage> {
     if (platformResponse.isSuccess) {
       if (platformResponse.message['results'].length == 0) {
         emptyPlatform = true;
+      } else {
+        var platformJson = platformResponse.message['results'][0];
+        if (platformJson['platform'] == PlatformConfig.aliyunOSS) {
+          platformModel.platform = platformJson['platform'];
+          platformModel.endPoint = platformJson['endPoint'];
+          platformModel.keyId = platformJson['keyId'];
+          platformModel.keySecret = platformJson['keySecret'];
+          platformModel.bucket = platformJson['bucket'];
+        }
       }
     } else {
       EasyLoading.showError(platformResponse.errorMessage);
@@ -54,6 +66,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
         title: Row(
           children: [
             Text("操作台"),
+            Text("    " + platformModel.bucket),
           ],
         ),
         backwardsCompatibility: false,

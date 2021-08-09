@@ -1,5 +1,6 @@
 import 'package:korat/api/base_model/base_model.dart';
 import 'package:korat/api/leancloud/base_api.dart';
+import 'package:korat/config/platform_config.dart';
 
 class PlatformApi {
   Future<ApiResponseModel> getMyPlatforms(String currentUserId) async {
@@ -31,6 +32,7 @@ class PlatformApi {
         'bucket': bucket,
         'keyId': accessKeyId,
         'keySecret': accessKeySecret,
+        'platform': PlatformConfig.aliyunOSS,
         'owner': {
           "__type": "Pointer",
           "className": "_User",
