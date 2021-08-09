@@ -60,7 +60,8 @@ class BaseApi {
     }
   }
 
-  Future<ApiResponseModel> getWithAuth(String url) async {
+  Future<ApiResponseModel> getWithAuth(
+      String url, Map<String, dynamic> data) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var options = Options(
       headers: {
@@ -74,6 +75,7 @@ class BaseApi {
       var response = await Dio().get(
         apiBaseUrl + url,
         options: options,
+        queryParameters: data,
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {

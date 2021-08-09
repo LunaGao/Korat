@@ -2,10 +2,18 @@ import 'package:korat/api/base_model/base_model.dart';
 import 'package:korat/api/leancloud/base_api.dart';
 
 class PlatformApi {
-  Future<ApiResponseModel> getMyPlatforms(String userObjectId) async {
-    return BaseApi().get(
+  Future<ApiResponseModel> getMyPlatforms(String currentUserId) async {
+    return BaseApi().getWithAuth(
       '/classes/Platform',
-      {'where': '{"owner": "' + userObjectId + '"}'},
+      {
+        'where': {
+          'owner': {
+            "__type": "Pointer",
+            "className": "_User",
+            "objectId": currentUserId,
+          },
+        }
+      },
     );
   }
 

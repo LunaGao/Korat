@@ -36,10 +36,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
     var platformResponse =
         await PlatformApi().getMyPlatforms(meResponse.message['objectId']);
     print(platformResponse.message);
-    if (!platformResponse.isSuccess) {
-      if (platformResponse.message == '') {
+    if (platformResponse.isSuccess) {
+      if (platformResponse.message['results'].length == 0) {
         emptyPlatform = true;
       }
+    } else {
+      EasyLoading.showError(platformResponse.errorMessage);
     }
     loading = false;
     setState(() {});
@@ -135,7 +137,11 @@ class _DashBoardPageState extends State<DashBoardPage> {
           Text("请配置博客数据文件存储平台"),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(AppRoute.platform_add_aliyun_oss);
+              Navigator.of(context)
+                  .pushNamed(AppRoute.platform_add_aliyun_oss)
+                  .then((value) {
+                getData();
+              });
             },
             child: Text("Aliyun oss"),
           ),
