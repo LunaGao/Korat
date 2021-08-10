@@ -28,6 +28,9 @@ dependencies:
   dio: ^4.0.0
   flutter_easyloading: ^3.0.0
   shared_preferences: ^2.0.6
+  intl: ^0.17.0
+  crypto: ^3.0.1
+  http: ^0.13.3
 
 dev_dependencies:
   flutter_test:

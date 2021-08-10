@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
 import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/user_api.dart';
 import 'package:korat/config/platform_config.dart';
@@ -50,6 +51,17 @@ class _DashBoardPageState extends State<DashBoardPage> {
           platformModel.keyId = platformJson['keyId'];
           platformModel.keySecret = platformJson['keySecret'];
           platformModel.bucket = platformJson['bucket'];
+          var oss = AliyunOSSClient(
+              platformModel.keyId,
+              platformModel.keySecret,
+              platformModel.endPoint,
+              platformModel.bucket);
+          var result = await oss.listObjects();
+          if (result.isSuccess) {
+            print(result.message);
+          } else {
+            print(result.errorMessage);
+          }
         }
       }
     } else {
