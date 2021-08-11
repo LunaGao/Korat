@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:korat/api/aliyun_oss/utils.dart';
-import 'package:korat/api/base_model/base_model.dart';
+import 'package:korat/api/base_model/post.dart';
+import 'package:korat/api/base_model/response_model.dart';
+import 'package:xml/xml.dart';
 
 class AliyunOSSClient {
   late String endpoint;
@@ -16,7 +18,7 @@ class AliyunOSSClient {
     this.bucket = bucket;
   }
 
-  Future<ApiResponseModel> listObjects() async {
+  Future<ResponseModel<List<Post>>> listObjects() async {
     var options = _getOptions('GET');
     try {
       var response = await Dio().get(
@@ -25,15 +27,45 @@ class AliyunOSSClient {
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ApiResponseModel(isSuccess: true, message: response.data);
+        return ResponseModel<List<Post>>(
+          isSuccess: true,
+          message: _getPostList(response.data),
+        );
       } else {
-        return ApiResponseModel(isSuccess: false, errorMessage: "");
+        return ResponseModel<List<Post>>(
+          isSuccess: false,
+          errorMessage: "",
+        );
       }
     } on DioError catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.response!.data);
+      return ResponseModel<List<Post>>(
+        isSuccess: false,
+        errorMessage: e.response!.data,
+      );
     } catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<List<Post>>(
+        isSuccess: false,
+        errorMessage: e.toString(),
+      );
     }
+  }
+
+  List<Post> _getPostList(String xmlData) {
+    List<Post> returnValue = [];
+    var document = XmlDocument.parse(xmlData);
+    var keyCount = document.findAllElements('KeyCount').first;
+    var keyCountText = keyCount.text;
+    int keyCountInt = int.parse(keyCountText);
+    if (keyCountInt > 0) {
+      var contents = document.findAllElements('Contents');
+      for (var content in contents) {
+        var fileName = content.getElement('Key')!.text;
+        var lastModified = content.getElement('LastModified')!.text;
+        returnValue.add(Post(fileName, lastModified));
+      }
+    }
+    return returnValue;
+  }
 
 //     <?xml version="1.0" encoding="UTF-8"?>
 // <ListBucketResult>
@@ -62,9 +94,8 @@ class AliyunOSSClient {
 //   </Contents>
 //   <KeyCount>1</KeyCount>
 // </ListBucketResult>
-  }
 
-  Future<ApiResponseModel> putObject() async {
+  Future<ResponseModel<String>> putObject() async {
     var fileName = "korat/hello.md";
     var options = _getOptions(
       'PUT',
@@ -79,14 +110,16 @@ class AliyunOSSClient {
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ApiResponseModel(isSuccess: true, message: response.data);
+        return ResponseModel<String>(isSuccess: true, message: response.data);
       } else {
-        return ApiResponseModel(isSuccess: false, errorMessage: "");
+        return ResponseModel<String>(isSuccess: false, errorMessage: "");
       }
     } on DioError catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.response!.data);
+      return ResponseModel<String>(
+          isSuccess: false, errorMessage: e.response!.data);
     } catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<String>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 

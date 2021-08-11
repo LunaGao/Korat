@@ -1,9 +1,9 @@
-import 'package:korat/api/base_model/base_model.dart';
+import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/leancloud/base_api.dart';
 import 'package:korat/config/platform_config.dart';
 
 class PlatformApi {
-  Future<ApiResponseModel> getMyPlatforms(String currentUserId) async {
+  Future<ResponseModel> getMyPlatforms(String currentUserId) async {
     return BaseApi().getWithAuth(
       '/classes/Platform',
       {
@@ -18,7 +18,7 @@ class PlatformApi {
     );
   }
 
-  Future<ApiResponseModel> postAliyunOSSPlatform(
+  Future<ResponseModel> postAliyunOSSPlatform(
     String endpoint,
     String bucket,
     String accessKeyId,

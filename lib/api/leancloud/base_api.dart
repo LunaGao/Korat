@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:korat/api/base_model/base_model.dart';
+import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/leancloud/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BaseApi {
-  Future<ApiResponseModel> get(String url, Map<String, dynamic> data) async {
+  Future<ResponseModel<dynamic>> get(
+      String url, Map<String, dynamic> data) async {
     var options = Options(
       headers: {
         'X-LC-Id': apiAppId,
@@ -20,19 +21,20 @@ class BaseApi {
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ApiResponseModel(isSuccess: true, message: response.data);
+        return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
-        return ApiResponseModel(isSuccess: false, errorMessage: "");
+        return ResponseModel<dynamic>(isSuccess: false, errorMessage: "");
       }
     } on DioError catch (e) {
-      return ApiResponseModel(
+      return ResponseModel<dynamic>(
           isSuccess: false, errorMessage: e.response!.data['error']);
     } catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<dynamic>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 
-  Future<ApiResponseModel> post(String url, dynamic data) async {
+  Future<ResponseModel<dynamic>> post(String url, dynamic data) async {
     var options = Options(
       headers: {
         'X-LC-Id': apiAppId,
@@ -48,19 +50,20 @@ class BaseApi {
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ApiResponseModel(isSuccess: true, message: response.data);
+        return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
-        return ApiResponseModel(isSuccess: false, errorMessage: "");
+        return ResponseModel<dynamic>(isSuccess: false, errorMessage: "");
       }
     } on DioError catch (e) {
-      return ApiResponseModel(
+      return ResponseModel<dynamic>(
           isSuccess: false, errorMessage: e.response!.data['error']);
     } catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<dynamic>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 
-  Future<ApiResponseModel> getWithAuth(
+  Future<ResponseModel<dynamic>> getWithAuth(
       String url, Map<String, dynamic> data) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var options = Options(
@@ -79,19 +82,20 @@ class BaseApi {
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ApiResponseModel(isSuccess: true, message: response.data);
+        return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
-        return ApiResponseModel(isSuccess: false, errorMessage: "");
+        return ResponseModel<dynamic>(isSuccess: false, errorMessage: "");
       }
     } on DioError catch (e) {
-      return ApiResponseModel(
+      return ResponseModel<dynamic>(
           isSuccess: false, errorMessage: e.response!.data['error']);
     } catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<dynamic>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 
-  Future<ApiResponseModel> postWithAuth(String url, dynamic data) async {
+  Future<ResponseModel<dynamic>> postWithAuth(String url, dynamic data) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var options = Options(
       headers: {
@@ -109,15 +113,16 @@ class BaseApi {
       );
       print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ApiResponseModel(isSuccess: true, message: response.data);
+        return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
-        return ApiResponseModel(isSuccess: false, errorMessage: "");
+        return ResponseModel<dynamic>(isSuccess: false, errorMessage: "");
       }
     } on DioError catch (e) {
-      return ApiResponseModel(
+      return ResponseModel<dynamic>(
           isSuccess: false, errorMessage: e.response!.data['error']);
     } catch (e) {
-      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<dynamic>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 }

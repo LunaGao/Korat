@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
+import 'package:korat/api/base_model/post.dart';
 import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/user_api.dart';
 import 'package:korat/config/platform_config.dart';
@@ -22,6 +23,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
   PlatformModel platformModel = PlatformModel();
   String email = '';
   var oss;
+  List<Post> posts = [];
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
           );
           var result = await oss.listObjects();
           if (result.isSuccess) {
-            print(result.message);
+            posts = result.message;
           } else {
             print(result.errorMessage);
           }
@@ -182,6 +184,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
       children: [
         Column(
           children: [
+            ...postListWidget(),
             TextButton(
               onPressed: () async {
                 var result = await oss.putObject();
@@ -202,5 +205,13 @@ class _DashBoardPageState extends State<DashBoardPage> {
         ),
       ],
     );
+  }
+
+  List<Widget> postListWidget() {
+    List<Widget> returnValue = [];
+    for (var post in posts) {
+      returnValue.add(Text(post.fileName));
+    }
+    return returnValue;
   }
 }
