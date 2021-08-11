@@ -21,6 +21,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
   bool emptyPlatform = false;
   PlatformModel platformModel = PlatformModel();
   String email = '';
+  var oss;
 
   @override
   void initState() {
@@ -51,11 +52,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
           platformModel.keyId = platformJson['keyId'];
           platformModel.keySecret = platformJson['keySecret'];
           platformModel.bucket = platformJson['bucket'];
-          var oss = AliyunOSSClient(
-              platformModel.keyId,
-              platformModel.keySecret,
-              platformModel.endPoint,
-              platformModel.bucket);
+          oss = AliyunOSSClient(
+            platformModel.keyId,
+            platformModel.keySecret,
+            platformModel.endPoint,
+            platformModel.bucket,
+          );
           var result = await oss.listObjects();
           if (result.isSuccess) {
             print(result.message);
@@ -176,6 +178,29 @@ class _DashBoardPageState extends State<DashBoardPage> {
   }
 
   Widget platformWidget() {
-    return SizedBox();
+    return Row(
+      children: [
+        Column(
+          children: [
+            TextButton(
+              onPressed: () async {
+                var result = await oss.putObject();
+                if (result.isSuccess) {
+                  print(result.message);
+                } else {
+                  print(result.errorMessage);
+                }
+              },
+              child: Text("创建帖子"),
+            ),
+          ],
+        ),
+        Column(
+          children: [
+            SizedBox(),
+          ],
+        ),
+      ],
+    );
   }
 }

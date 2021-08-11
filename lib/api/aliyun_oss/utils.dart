@@ -12,14 +12,17 @@ String httpDateNow() {
   return "$dts GMT";
 }
 
-String httpAuthorization(
+String getAuthorization(
   String keyId,
   String keySecret,
   String httpMethod,
-  String date,
-) {
+  String date, {
+  String path = '',
+  String contentType = '',
+}) {
+  path = "/korat-data/" + path;
   String signature =
-      httpMethod + "\n\n\n" + date + "\nx-oss-date:" + date + "\n/korat-data/";
+      "$httpMethod\n\n$contentType\n$date\nx-oss-date:$date\n$path";
   var hmac = new Hmac(sha1, utf8.encode(keySecret));
   var digest = hmac.convert(utf8.encode(signature));
   var returnSignature = base64Encode(digest.bytes);

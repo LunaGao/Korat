@@ -17,18 +17,7 @@ class AliyunOSSClient {
   }
 
   Future<ApiResponseModel> listObjects() async {
-    var date = httpDateNow();
-    print(date);
-    var authorization =
-        httpAuthorization(this.accessKey, this.accessSecret, 'GET', date);
-    print(authorization);
-
-    var options = Options(
-      headers: {
-        'x-oss-date': date,
-        'Authorization': authorization,
-      },
-    );
+    var options = _getOptions('GET');
     try {
       var response = await Dio().get(
         "http://$bucket.$endpoint/?list-type=2&prefix=korat/",
@@ -45,46 +34,61 @@ class AliyunOSSClient {
     } catch (e) {
       return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
     }
+
+//     <?xml version="1.0" encoding="UTF-8"?>
+// <ListBucketResult>
+//   <Name>korat-data</Name>
+//   <Prefix>korat/</Prefix>
+//   <MaxKeys>100</MaxKeys>
+//   <Delimiter></Delimiter>
+//   <IsTruncated>false</IsTruncated>
+//   <KeyCount>0</KeyCount>
+// </ListBucketResult>
+
+// <?xml version="1.0" encoding="UTF-8"?>
+// <ListBucketResult>
+//   <Name>korat-data</Name>
+//   <Prefix>korat/</Prefix>
+//   <MaxKeys>100</MaxKeys>
+//   <Delimiter></Delimiter>
+//   <IsTruncated>false</IsTruncated>
+//   <Contents>
+//     <Key>korat/hello</Key>
+//     <LastModified>2021-08-11T15:35:08.000Z</LastModified>
+//     <ETag>"5D41402ABC4B2A76B9719D911017C592"</ETag>
+//     <Type>Normal</Type>
+//     <Size>5</Size>
+//     <StorageClass>Standard</StorageClass>
+//   </Contents>
+//   <KeyCount>1</KeyCount>
+// </ListBucketResult>
   }
 
-  // /// List Buckets
-  // HttpRequest list_buckets(
-  //     {prefix: '', marker: '', max_keys: 100, params: null}) {
-  //   final listParam = {
-  //     'prefix': prefix,
-  //     'marker': marker,
-  //     'max-keys': '${max_keys}'
-  //   };
-  //   if ((params ?? {}).isNotEmpty) {
-  //     if (params.containsKey('tag-key')) {
-  //       listParam['tag-key'] = params['tag-key'];
-  //     }
-  //     if (params.containsKey('tag-value')) {
-  //       listParam['tag-value'] = params['tag-value'];
-  //     }
-  //   }
-  //   final url = "http://${this.endpoint}";
-  //   HttpRequest req = new HttpRequest(url, 'GET', listParam, {});
-  //   this._auth.signRequest(req, '', '');
-  //   return req;
-  // }
-
-  // /// upload file
-  // /// @param fileData type:List<int> data of upload file
-  // /// @param bucketName type:String name of bucket
-  // /// @param fileKey type:String upload filename
-  // /// @return type:HttpRequest
-  // HttpRequest putObject(List<int> fileData, String bucketName, String fileKey) {
-  //   final headers = {
-  //     'content-md5': md5File(fileData),
-  //     'content-type': contentTypeByFilename(fileKey)
-  //   };
-  //   final url = "https://${bucketName}.${this.endpoint}/${fileKey}";
-  //   HttpRequest req = new HttpRequest(url, 'PUT', {}, headers);
-  //   this._auth.signRequest(req, bucketName, fileKey);
-  //   req.fileData = fileData;
-  //   return req;
-  // }
+  Future<ApiResponseModel> putObject() async {
+    var fileName = "korat/hello.md";
+    var options = _getOptions(
+      'PUT',
+      file: fileName,
+      contentType: "text/plain",
+    );
+    try {
+      var response = await Dio().put(
+        "http://$bucket.$endpoint/$fileName",
+        options: options,
+        data: "hello 123123 aaa",
+      );
+      print(response);
+      if (200 <= response.statusCode! && response.statusCode! < 300) {
+        return ApiResponseModel(isSuccess: true, message: response.data);
+      } else {
+        return ApiResponseModel(isSuccess: false, errorMessage: "");
+      }
+    } on DioError catch (e) {
+      return ApiResponseModel(isSuccess: false, errorMessage: e.response!.data);
+    } catch (e) {
+      return ApiResponseModel(isSuccess: false, errorMessage: e.toString());
+    }
+  }
 
   // /// delete file
   // /// @param bucketName type:String name of bucket
@@ -142,4 +146,32 @@ class AliyunOSSClient {
   //   this._auth.signRequest(req, bucketName, fileKey);
   //   return req;
   // }
+
+  Options _getOptions(
+    String httpMethod, {
+    String file = '',
+    String contentType = '',
+  }) {
+    var date = httpDateNow();
+    print(date);
+    var authorization = getAuthorization(
+      this.accessKey,
+      this.accessSecret,
+      httpMethod,
+      date,
+      contentType: 'text/plain',
+      path: file,
+    );
+    print(authorization);
+    var headers = {
+      'x-oss-date': date,
+      'Authorization': authorization,
+      'Connection': 'keep-alive',
+      'Content-Type': 'text/plain',
+    };
+
+    return Options(
+      headers: headers,
+    );
+  }
 }
