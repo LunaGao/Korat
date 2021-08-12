@@ -8,6 +8,7 @@ import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/user_api.dart';
 import 'package:korat/config/platform_config.dart';
 import 'package:korat/models/platform.dart';
+import 'package:korat/pages/dashboard/widgets/editor_widget.dart';
 import 'package:korat/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,11 +28,16 @@ class _DashBoardPageState extends State<DashBoardPage> {
   var oss;
   List<Post> posts = [];
   String displayValue = '';
-  TextEditingController textEditingController = TextEditingController();
+  EditorController editorController = EditorController();
 
   @override
   void initState() {
     super.initState();
+    editorController.addListener((text) {
+      setState(() {
+        displayValue = text;
+      });
+    });
     getData();
   }
 
@@ -119,9 +125,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
   Widget mainBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
       children: [
         emailNotVerifiedWidget(),
-        emptyPlatform ? emptyPlatformWidget() : platformWidget(),
+        Expanded(
+          child: emptyPlatform ? emptyPlatformWidget() : platformWidget(),
+        ),
       ],
     );
   }
@@ -189,46 +198,56 @@ class _DashBoardPageState extends State<DashBoardPage> {
 
   Widget platformWidget() {
     return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: 200,
-          child: Column(
-            children: [
-              ...postListWidget(),
-              TextButton(
-                onPressed: () async {
-                  var result = await oss.putObject();
-                  if (result.isSuccess) {
-                    print(result.message);
-                  } else {
-                    print(result.errorMessage);
-                  }
-                },
-                child: Text("创建帖子"),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...postListWidget(),
+                TextButton(
+                  onPressed: () async {
+                    var result = await oss.putObject();
+                    if (result.isSuccess) {
+                      print(result.message);
+                    } else {
+                      print(result.errorMessage);
+                    }
+                  },
+                  child: Text("创建帖子"),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: VerticalDivider(
+            width: 1,
+          ),
+        ),
+        EditorWidget(
+          editorController: editorController,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: VerticalDivider(
+            width: 1,
           ),
         ),
         Expanded(
           flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                TextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  controller: textEditingController,
-                )
-              ],
+            child: Markdown(
+              shrinkWrap: true,
+              data: displayValue,
             ),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Markdown(
-            shrinkWrap: true,
-            data: displayValue,
           ),
         ),
       ],
@@ -246,7 +265,8 @@ class _DashBoardPageState extends State<DashBoardPage> {
           } else {
             displayValue = responseModel.errorMessage;
           }
-          textEditingController.text = displayValue;
+          editorController.reset();
+          editorController.setText(displayValue);
           setState(() {});
         },
         child: Text(post.displayFileName),
