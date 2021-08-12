@@ -33,14 +33,108 @@ class _EditorWidgetState extends State<EditorWidget> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              controller: textEditingController,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                getTopControllerButtons(),
+                TextButton(
+                  onPressed: () {},
+                  child: Text("保存"),
+                ),
+              ],
+            ),
+            Expanded(
+              child: TextField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                controller: textEditingController,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.all(8.0),
+                  hintText: "开始记录的奇妙之旅吧",
+                  border: InputBorder.none,
+                  isCollapsed: true,
+                ),
+              ),
             )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget getTopControllerButtons() {
+    return Expanded(
+      child: Wrap(
+        spacing: 2,
+        runSpacing: 2,
+        crossAxisAlignment: WrapCrossAlignment.start,
+        alignment: WrapAlignment.start,
+        children: [
+          IconButton(
+            onPressed: () {},
+            tooltip: "加粗",
+            icon: Icon(
+              Icons.format_bold_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.format_italic_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.format_clear_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.format_quote_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.format_list_bulleted_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.format_list_numbered_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.checklist_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.insert_link_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.insert_photo_outlined,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.table_chart_outlined,
+            ),
+          ),
+        ],
       ),
     );
   }
