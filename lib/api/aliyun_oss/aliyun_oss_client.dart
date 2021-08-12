@@ -50,51 +50,6 @@ class AliyunOSSClient {
     }
   }
 
-  List<Post> _getPostList(String xmlData) {
-    List<Post> returnValue = [];
-    var document = XmlDocument.parse(xmlData);
-    var keyCount = document.findAllElements('KeyCount').first;
-    var keyCountText = keyCount.text;
-    int keyCountInt = int.parse(keyCountText);
-    if (keyCountInt > 0) {
-      var contents = document.findAllElements('Contents');
-      for (var content in contents) {
-        var fileName = content.getElement('Key')!.text;
-        var lastModified = content.getElement('LastModified')!.text;
-        returnValue.add(Post(fileName, lastModified));
-      }
-    }
-    return returnValue;
-  }
-
-//     <?xml version="1.0" encoding="UTF-8"?>
-// <ListBucketResult>
-//   <Name>korat-data</Name>
-//   <Prefix>korat/</Prefix>
-//   <MaxKeys>100</MaxKeys>
-//   <Delimiter></Delimiter>
-//   <IsTruncated>false</IsTruncated>
-//   <KeyCount>0</KeyCount>
-// </ListBucketResult>
-
-// <?xml version="1.0" encoding="UTF-8"?>
-// <ListBucketResult>
-//   <Name>korat-data</Name>
-//   <Prefix>korat/</Prefix>
-//   <MaxKeys>100</MaxKeys>
-//   <Delimiter></Delimiter>
-//   <IsTruncated>false</IsTruncated>
-//   <Contents>
-//     <Key>korat/hello</Key>
-//     <LastModified>2021-08-11T15:35:08.000Z</LastModified>
-//     <ETag>"5D41402ABC4B2A76B9719D911017C592"</ETag>
-//     <Type>Normal</Type>
-//     <Size>5</Size>
-//     <StorageClass>Standard</StorageClass>
-//   </Contents>
-//   <KeyCount>1</KeyCount>
-// </ListBucketResult>
-
   Future<ResponseModel<String>> putObject() async {
     var fileName = "korat/hello.md";
     var options = _getOptions(
@@ -120,6 +75,37 @@ class AliyunOSSClient {
     } catch (e) {
       return ResponseModel<String>(
           isSuccess: false, errorMessage: e.toString());
+    }
+  }
+
+  Future<ResponseModel<Post>> getObject(Post post) async {
+    var options = _getOptions(
+      'GET',
+      file: post.fileName,
+      contentType: "text/plain",
+    );
+    try {
+      var response = await Dio().get(
+        "http://$bucket.$endpoint/${post.fileName}",
+        options: options,
+      );
+      print(response);
+      if (200 <= response.statusCode! && response.statusCode! < 300) {
+        Post returnPost = Post(
+          post.fileName,
+          post.displayFileName,
+          post.lastModified,
+          value: response.data,
+        );
+        return ResponseModel<Post>(isSuccess: true, message: returnPost);
+      } else {
+        return ResponseModel<Post>(isSuccess: false, errorMessage: "");
+      }
+    } on DioError catch (e) {
+      return ResponseModel<Post>(
+          isSuccess: false, errorMessage: e.response!.data);
+    } catch (e) {
+      return ResponseModel<Post>(isSuccess: false, errorMessage: e.toString());
     }
   }
 
@@ -206,5 +192,29 @@ class AliyunOSSClient {
     return Options(
       headers: headers,
     );
+  }
+
+  List<Post> _getPostList(String xmlData) {
+    List<Post> returnValue = [];
+    var document = XmlDocument.parse(xmlData);
+    var keyCount = document.findAllElements('KeyCount').first;
+    var keyCountText = keyCount.text;
+    int keyCountInt = int.parse(keyCountText);
+    if (keyCountInt > 0) {
+      var contents = document.findAllElements('Contents');
+      for (var content in contents) {
+        var fileName = content.getElement('Key')!.text;
+        var displayFileName = fileName.substring(6);
+        var lastModified = content.getElement('LastModified')!.text;
+        returnValue.add(
+          Post(
+            fileName,
+            displayFileName,
+            lastModified,
+          ),
+        );
+      }
+    }
+    return returnValue;
   }
 }
