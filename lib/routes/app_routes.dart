@@ -41,5 +41,6 @@ class AppRoute {
   static const String signin = '/signin';
   static const String signup = '/signup';
   static const String dashboard = '/dashboard';
+  static const String create_platform_guide = '/guide';
   static const String platform_add_aliyun_oss = '/platform_add_aliyun_oss';
 }

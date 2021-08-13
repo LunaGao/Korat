@@ -1,4 +1,7 @@
+import 'dart:js';
+
 import 'package:flutter/material.dart';
+import 'package:korat/pages/add_platform/create_platfrom_guide.dart';
 import 'package:korat/pages/add_platform/platform_add_aliyun_oss.dart';
 import 'package:korat/pages/dashboard/dashboard.dart';
 import 'package:korat/pages/public/error.dart';
@@ -15,6 +18,7 @@ class WebRoute {
       AppRoute.signup: (context) => SignUpPage(),
       AppRoute.dashboard: (context) => DashBoardPage(),
       AppRoute.platform_add_aliyun_oss: (context) => PlatformAddAliyunOSSPage(),
+      AppRoute.create_platform_guide: (context) => CreatePlatformGuidePage(),
     };
   }
 

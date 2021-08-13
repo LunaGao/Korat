@@ -50,16 +50,16 @@ class AliyunOSSClient {
     }
   }
 
-  Future<ResponseModel<String>> putObject() async {
-    var fileName = "korat/hello.md";
+  Future<ResponseModel<String>> putObject(String fileName) async {
+    var fileNamePath = 'korat/$fileName.md';
     var options = _getOptions(
       'PUT',
-      file: fileName,
+      file: fileNamePath,
       contentType: "text/plain",
     );
     try {
       var response = await Dio().put(
-        "http://$bucket.$endpoint/$fileName",
+        "http://$bucket.$endpoint/$fileNamePath",
         options: options,
         data: "hello 123123 aaa",
       );

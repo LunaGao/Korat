@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
-import 'package:korat/api/base_model/post.dart';
-import 'package:korat/api/base_model/response_model.dart';
+import 'package:korat/api/base_model/user.dart';
 import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/user_api.dart';
 import 'package:korat/config/platform_config.dart';
 import 'package:korat/models/platform.dart';
 import 'package:korat/pages/dashboard/widgets/editor_widget.dart';
+import 'package:korat/pages/dashboard/widgets/post_list_widget.dart';
+import 'package:korat/pages/dashboard/widgets/preview_widget.dart';
+import 'package:korat/pages/dashboard/widgets/utils_widget.dart';
 import 'package:korat/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,19 +22,25 @@ class DashBoardPage extends StatefulWidget {
 
 class _DashBoardPageState extends State<DashBoardPage> {
   bool loading = true;
-  bool emailVerified = true;
+  User user = User();
   bool emptyPlatform = false;
   PlatformModel platformModel = PlatformModel();
-  String email = '';
-  var oss;
-  List<Post> posts = [];
+  AliyunOSSClient? oss;
   String displayValue = '';
   EditorController editorController = EditorController();
+  PostListController postListController = PostListController();
 
   @override
   void initState() {
     super.initState();
     editorController.addListener((text) {
+      setState(() {
+        displayValue = text;
+      });
+    });
+    postListController.addListener((text) {
+      editorController.reset();
+      editorController.setText(text);
       setState(() {
         displayValue = text;
       });
@@ -48,14 +55,14 @@ class _DashBoardPageState extends State<DashBoardPage> {
       prefs.remove('sessionToken');
       Navigator.of(context).pushReplacementNamed(AppRoute.home);
     }
-    emailVerified = meResponse.message['emailVerified'];
-    email = meResponse.message['email'];
-    var platformResponse =
-        await PlatformApi().getMyPlatforms(meResponse.message['objectId']);
-    print(platformResponse.message);
+    user = meResponse.message!;
+
+    var platformResponse = await PlatformApi().getMyPlatforms(user.objectId);
+    print(platformResponse);
     if (platformResponse.isSuccess) {
       if (platformResponse.message['results'].length == 0) {
-        emptyPlatform = true;
+        Navigator.of(context).pushNamed(AppRoute.create_platform_guide);
+        return;
       } else {
         var platformJson = platformResponse.message['results'][0];
         if (platformJson['platform'] == PlatformConfig.aliyunOSS) {
@@ -70,12 +77,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
             platformModel.endPoint,
             platformModel.bucket,
           );
-          var result = await oss.listObjects();
-          if (result.isSuccess) {
-            posts = result.message;
-          } else {
-            print(result.errorMessage);
-          }
+          postListController.setStorePlatform(oss!);
         }
       }
     } else {
@@ -127,73 +129,14 @@ class _DashBoardPageState extends State<DashBoardPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
       children: [
-        emailNotVerifiedWidget(),
+        EmailNotVerifiedWidget(
+          user,
+        ),
         Expanded(
-          child: emptyPlatform ? emptyPlatformWidget() : platformWidget(),
+          child: platformWidget(),
         ),
       ],
     );
-  }
-
-  Widget emptyPlatformWidget() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text("请配置博客数据文件存储平台"),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .pushNamed(AppRoute.platform_add_aliyun_oss)
-                  .then((value) {
-                getData();
-              });
-            },
-            child: Text("Aliyun oss"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget emailNotVerifiedWidget() {
-    return emailVerified
-        ? SizedBox()
-        : Container(
-            color: Colors.redAccent,
-            padding: EdgeInsets.all(14.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "您的邮箱未验证，请验证邮箱。",
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                TextButton(
-                  onPressed: () {
-                    UserApi().requestEmailVerify(email).then((value) {
-                      if (value.isSuccess) {
-                        EasyLoading.showSuccess("邮件已重发");
-                      }
-                    });
-                  },
-                  child: Text(
-                    "重新发送邮件",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
   }
 
   Widget platformWidget() {
@@ -201,78 +144,16 @@ class _DashBoardPageState extends State<DashBoardPage> {
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 200,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...postListWidget(),
-                TextButton(
-                  onPressed: () async {
-                    var result = await oss.putObject();
-                    if (result.isSuccess) {
-                      print(result.message);
-                    } else {
-                      print(result.errorMessage);
-                    }
-                  },
-                  child: Text("创建帖子"),
-                ),
-              ],
-            ),
-          ),
+        PostListWidget(
+          postListController,
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: VerticalDivider(
-            width: 1,
-          ),
-        ),
+        DashboardDivider(),
         EditorWidget(
           editorController: editorController,
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: VerticalDivider(
-            width: 1,
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Markdown(
-              shrinkWrap: true,
-              data: displayValue,
-            ),
-          ),
-        ),
+        DashboardDivider(),
+        PreviewWidget(displayValue),
       ],
     );
-  }
-
-  List<Widget> postListWidget() {
-    List<Widget> returnValue = [];
-    for (var post in posts) {
-      var postItem = TextButton(
-        onPressed: () async {
-          ResponseModel<Post> responseModel = await oss.getObject(post);
-          if (responseModel.isSuccess) {
-            displayValue = responseModel.message!.value;
-          } else {
-            displayValue = responseModel.errorMessage;
-          }
-          editorController.reset();
-          editorController.setText(displayValue);
-          setState(() {});
-        },
-        child: Text(post.displayFileName),
-      );
-      returnValue.add(postItem);
-    }
-    return returnValue;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/routes/app_routes.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,6 +22,14 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoute.initialRoute,
       routes: AppRoute.sharedInstance().routes,
       onGenerateRoute: AppRoute.sharedInstance().generatedRoutes,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate, // This is required
+      ],
+      supportedLocales: [
+        Locale('zh', ''),
+      ],
     );
   }
 }

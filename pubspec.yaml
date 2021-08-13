@@ -23,6 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.2
   dio: ^4.0.0
@@ -32,6 +34,7 @@ dependencies:
   crypto: ^3.0.1
   xml: ^5.1.2
   flutter_markdown: ^0.6.4
+  adaptive_dialog: ^1.1.0
 
 dev_dependencies:
   flutter_test:
