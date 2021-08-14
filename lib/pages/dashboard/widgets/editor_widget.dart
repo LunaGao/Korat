@@ -13,6 +13,7 @@ class EditorWidget extends StatefulWidget {
 
 class _EditorWidgetState extends State<EditorWidget> {
   TextEditingController textEditingController = TextEditingController();
+  bool showWelcomePage = true;
 
   @override
   void initState() {
@@ -22,6 +23,9 @@ class _EditorWidgetState extends State<EditorWidget> {
     });
     widget.editorController.addVoidListner(() {
       textEditingController.text = widget.editorController.getText();
+      setState(() {
+        showWelcomePage = widget.editorController.getShowWelcomePage();
+      });
     });
   }
 
@@ -31,36 +35,46 @@ class _EditorWidgetState extends State<EditorWidget> {
       flex: 1,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                getTopControllerButtons(),
-                TextButton(
-                  onPressed: () {},
-                  child: Text("保存"),
+        child: showWelcomePage
+            ? Center(
+                child: Text(
+                  "开始记录的奇妙之旅吧",
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 40,
+                  ),
                 ),
-              ],
-            ),
-            Expanded(
-              child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: textEditingController,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(8.0),
-                  hintText: "开始记录的奇妙之旅吧",
-                  border: InputBorder.none,
-                  isCollapsed: true,
-                ),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      getTopControllerButtons(),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text("保存"),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: TextField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      controller: textEditingController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(8.0),
+                        hintText: "开始记录的奇妙之旅吧",
+                        border: InputBorder.none,
+                        isCollapsed: true,
+                      ),
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
       ),
     );
   }
@@ -144,6 +158,7 @@ class EditorController {
   StringCallback? _stringCallback;
   VoidCallback? _voidCallback;
   String _text = '';
+  bool _showWelcomePage = true;
 
   void addListener(StringCallback callback) {
     _stringCallback = callback;
@@ -157,6 +172,7 @@ class EditorController {
 
   void setText(String text) {
     _text = text;
+    _showWelcomePage = false;
     if (_voidCallback != null) {
       _voidCallback!();
     }
@@ -164,6 +180,10 @@ class EditorController {
 
   String getText() {
     return _text;
+  }
+
+  bool getShowWelcomePage() {
+    return this._showWelcomePage;
   }
 
   void sendTextToListener(String text) {
