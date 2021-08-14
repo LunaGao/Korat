@@ -7,8 +7,8 @@ import 'package:korat/api/base_model/response_model.dart';
 
 class PostListWidget extends StatefulWidget {
   final PostListController postListController;
-  const PostListWidget(
-    this.postListController, {
+  const PostListWidget({
+    required this.postListController,
     Key? key,
   }) : super(key: key);
 

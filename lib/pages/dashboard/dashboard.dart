@@ -26,24 +26,20 @@ class _DashBoardPageState extends State<DashBoardPage> {
   bool emptyPlatform = false;
   PlatformModel platformModel = PlatformModel();
   AliyunOSSClient? oss;
-  String displayValue = '';
   EditorController editorController = EditorController();
   PostListController postListController = PostListController();
+  PreviewController previewController = PreviewController();
 
   @override
   void initState() {
     super.initState();
     editorController.addListener((text) {
-      setState(() {
-        displayValue = text;
-      });
+      previewController.setDisplayValue(text);
     });
     postListController.addListener((text) {
       editorController.reset();
       editorController.setText(text);
-      setState(() {
-        displayValue = text;
-      });
+      previewController.setDisplayValue(text);
     });
     getData();
   }
@@ -145,14 +141,16 @@ class _DashBoardPageState extends State<DashBoardPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         PostListWidget(
-          postListController,
+          postListController: postListController,
         ),
         DashboardDivider(),
         EditorWidget(
           editorController: editorController,
         ),
         DashboardDivider(),
-        PreviewWidget(displayValue),
+        PreviewWidget(
+          previewController: previewController,
+        ),
       ],
     );
   }
