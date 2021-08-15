@@ -25,7 +25,6 @@ class AliyunOSSClient {
         "http://$bucket.$endpoint/?list-type=2&prefix=korat/",
         options: options,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<List<Post>>(
           isSuccess: true,
@@ -50,7 +49,7 @@ class AliyunOSSClient {
     }
   }
 
-  Future<ResponseModel<String>> putObject(String fileName) async {
+  Future<ResponseModel<String>> putObject(String fileName, String value) async {
     var fileNamePath = 'korat/$fileName.md';
     var options = _getOptions(
       'PUT',
@@ -61,9 +60,8 @@ class AliyunOSSClient {
       var response = await Dio().put(
         "http://$bucket.$endpoint/$fileNamePath",
         options: options,
-        data: "hello 123123 aaa",
+        data: value,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<String>(isSuccess: true, message: response.data);
       } else {
@@ -89,7 +87,6 @@ class AliyunOSSClient {
         "http://$bucket.$endpoint/${post.fileName}",
         options: options,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         Post returnPost = Post(
           post.fileName,
@@ -109,16 +106,31 @@ class AliyunOSSClient {
     }
   }
 
-  // /// delete file
-  // /// @param bucketName type:String name of bucket
-  // /// @param fileKey type:String upload filename
-  // /// @return type:HttpRequest
-  // HttpRequest deleteObject(String bucketName, String fileKey) {
-  //   final url = "https://${bucketName}.${this.endpoint}/${fileKey}";
-  //   final req = HttpRequest(url, 'DELETE', {}, {});
-  //   this._auth.signRequest(req, bucketName, fileKey);
-  //   return req;
-  // }
+  Future<ResponseModel<String>> deleteObject(Post post) async {
+    var options = _getOptions(
+      'DELETE',
+      file: post.fileName,
+    );
+    try {
+      var response = await Dio().delete(
+        "http://$bucket.$endpoint/${post.fileName}",
+        options: options,
+      );
+      print(response);
+      if (200 <= response.statusCode! && response.statusCode! < 300) {
+        return ResponseModel<String>(isSuccess: true, message: '');
+      } else {
+        return ResponseModel<String>(
+            isSuccess: false, errorMessage: response.data);
+      }
+    } on DioError catch (e) {
+      return ResponseModel<String>(
+          isSuccess: false, errorMessage: e.response!.data);
+    } catch (e) {
+      return ResponseModel<String>(
+          isSuccess: false, errorMessage: e.toString());
+    }
+  }
 
   // /// start multipart upload
   // ///
@@ -204,7 +216,7 @@ class AliyunOSSClient {
       var contents = document.findAllElements('Contents');
       for (var content in contents) {
         var fileName = content.getElement('Key')!.text;
-        var displayFileName = fileName.substring(6);
+        var displayFileName = fileName.substring(6, fileName.length - 3);
         var lastModified = content.getElement('LastModified')!.text;
         returnValue.add(
           Post(

@@ -171,7 +171,7 @@ class EditorController {
   void reset() {}
 
   void setText(String text) {
-    _text = text;
+    _text = text.trimRight();
     _showWelcomePage = false;
     if (_voidCallback != null) {
       _voidCallback!();

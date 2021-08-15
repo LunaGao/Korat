@@ -55,8 +55,29 @@ class _PostListWidgetState extends State<PostListWidget> {
     ).then((value) async {
       print(value);
       if (value != null && value.length != 0) {
+        var result = await widget.postListController
+            .getPlatform()
+            .putObject(value[0], ' ');
+        if (result.isSuccess) {
+          print(result.message);
+          getData();
+        } else {
+          print(result.errorMessage);
+          EasyLoading.showError(result.errorMessage);
+        }
+      }
+    });
+  }
+
+  onDeletePost(Post post) {
+    showOkCancelAlertDialog(
+      title: "是否删除？",
+      context: context,
+    ).then((value) async {
+      print(value);
+      if (value == OkCancelResult.ok) {
         var result =
-            await widget.postListController.getPlatform().putObject(value[0]);
+            await widget.postListController.getPlatform().deleteObject(post);
         if (result.isSuccess) {
           print(result.message);
           getData();
@@ -71,16 +92,14 @@ class _PostListWidgetState extends State<PostListWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
+      width: 240,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
         child: loading
             ? Center(
                 child: CircularProgressIndicator(),
               )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            : ListView(
                 children: [
                   ...postListWidget(),
                   TextButton(
@@ -98,8 +117,8 @@ class _PostListWidgetState extends State<PostListWidget> {
   List<Widget> postListWidget() {
     List<Widget> returnValue = [];
     for (var post in posts) {
-      var postItem = TextButton(
-        onPressed: () async {
+      var postItem = ListTile(
+        onTap: () async {
           ResponseModel<Post> responseModel =
               await widget.postListController.getPlatform().getObject(post);
           String displayValue;
@@ -111,7 +130,30 @@ class _PostListWidgetState extends State<PostListWidget> {
           widget.postListController.onClickPostTitle(displayValue);
           setState(() {});
         },
-        child: Text(post.displayFileName),
+        title: Text(post.displayFileName),
+        trailing: PopupMenuButton<String>(
+          child: Icon(Icons.more_vert),
+          onSelected: (value) {
+            if (value == 'delete') {
+              onDeletePost(post);
+            }
+          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            PopupMenuItem(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Icon(
+                    Icons.delete_forever_outlined,
+                    color: Colors.red,
+                  ),
+                  Text('删除'),
+                ],
+              ),
+              value: 'delete',
+            ),
+          ],
+        ),
       );
       returnValue.add(postItem);
     }
