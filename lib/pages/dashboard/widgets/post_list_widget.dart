@@ -57,7 +57,7 @@ class _PostListWidgetState extends State<PostListWidget> {
       if (value != null && value.length != 0) {
         var result = await widget.postListController
             .getPlatform()
-            .putObject(value[0], ' ');
+            .putObject('korat/' + value[0] + '.md', ' ');
         if (result.isSuccess) {
           print(result.message);
           getData();
@@ -121,13 +121,13 @@ class _PostListWidgetState extends State<PostListWidget> {
         onTap: () async {
           ResponseModel<Post> responseModel =
               await widget.postListController.getPlatform().getObject(post);
-          String displayValue;
           if (responseModel.isSuccess) {
-            displayValue = responseModel.message!.value;
+            widget.postListController.onClickPostTitle(responseModel.message);
           } else {
-            displayValue = responseModel.errorMessage;
+            widget.postListController.onClickPostTitle(null);
+            EasyLoading.showError("载入错误");
+            getData();
           }
-          widget.postListController.onClickPostTitle(displayValue);
           setState(() {});
         },
         title: Text(post.displayFileName),
@@ -163,36 +163,36 @@ class _PostListWidgetState extends State<PostListWidget> {
 
 class PostListController {
   AliyunOSSClient? _platform;
-  StringCallback? _stringCallback;
+  PostCallback? _postCallback;
   VoidCallback? _postListListener;
 
   void setStorePlatform(AliyunOSSClient oss) {
-    _platform = oss;
-    if (_postListListener != null) {
-      _postListListener!();
+    this._platform = oss;
+    if (this._postListListener != null) {
+      this._postListListener!();
     }
   }
 
   AliyunOSSClient getPlatform() {
-    return _platform!;
+    return this._platform!;
   }
 
-  void onClickPostTitle(String value) {
-    if (_stringCallback != null) {
-      _stringCallback!(value);
+  void onClickPostTitle(Post? post) {
+    if (this._postCallback != null) {
+      this._postCallback!(post);
     }
   }
 
-  void addListener(StringCallback callback) {
-    _stringCallback = callback;
+  void addListener(PostCallback callback) {
+    this._postCallback = callback;
   }
 
   void addPostListListener(VoidCallback callback) {
-    _postListListener = callback;
-    if (_postListListener != null && _platform != null) {
-      _postListListener!();
+    this._postListListener = callback;
+    if (this._postListListener != null && this._platform != null) {
+      this._postListListener!();
     }
   }
 }
 
-typedef StringCallback = void Function(String text);
+typedef PostCallback = void Function(Post? post);

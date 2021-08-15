@@ -49,8 +49,8 @@ class AliyunOSSClient {
     }
   }
 
-  Future<ResponseModel<String>> putObject(String fileName, String value) async {
-    var fileNamePath = 'korat/$fileName.md';
+  Future<ResponseModel<String>> putObject(
+      String fileNamePath, String value) async {
     var options = _getOptions(
       'PUT',
       file: fileNamePath,
@@ -92,7 +92,7 @@ class AliyunOSSClient {
           post.fileName,
           post.displayFileName,
           post.lastModified,
-          value: response.data,
+          value: (response.data as String).trimRight(),
         );
         return ResponseModel<Post>(isSuccess: true, message: returnPost);
       } else {

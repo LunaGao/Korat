@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
+import 'package:korat/api/base_model/post.dart';
 
 class EditorWidget extends StatefulWidget {
   final EditorController editorController;
@@ -22,7 +25,7 @@ class _EditorWidgetState extends State<EditorWidget> {
       widget.editorController.sendTextToListener(textEditingController.text);
     });
     widget.editorController.addVoidListner(() {
-      textEditingController.text = widget.editorController.getText();
+      textEditingController.text = widget.editorController.getPost().value;
       setState(() {
         showWelcomePage = widget.editorController.getShowWelcomePage();
       });
@@ -55,7 +58,20 @@ class _EditorWidgetState extends State<EditorWidget> {
                     children: [
                       getTopControllerButtons(),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          var result = await widget.editorController
+                              .getPlatform()
+                              .putObject(
+                                  widget.editorController.getPost().fileName,
+                                  textEditingController.text);
+                          if (result.isSuccess) {
+                            print(result.message);
+                            EasyLoading.showSuccess("保存成功！");
+                          } else {
+                            print(result.errorMessage);
+                            EasyLoading.showError(result.errorMessage);
+                          }
+                        },
                         child: Text("保存"),
                       ),
                     ],
@@ -157,8 +173,17 @@ class _EditorWidgetState extends State<EditorWidget> {
 class EditorController {
   StringCallback? _stringCallback;
   VoidCallback? _voidCallback;
-  String _text = '';
+  Post? _post;
   bool _showWelcomePage = true;
+  AliyunOSSClient? _platform;
+
+  void setStorePlatform(AliyunOSSClient oss) {
+    this._platform = oss;
+  }
+
+  AliyunOSSClient getPlatform() {
+    return this._platform!;
+  }
 
   void addListener(StringCallback callback) {
     _stringCallback = callback;
@@ -170,16 +195,23 @@ class EditorController {
 
   void reset() {}
 
-  void setText(String text) {
-    _text = text.trimRight();
-    _showWelcomePage = false;
-    if (_voidCallback != null) {
-      _voidCallback!();
+  void setPost(Post? post) {
+    this._post = post;
+    if (post == null) {
+      this._showWelcomePage = true;
+    } else {
+      this._showWelcomePage = false;
+    }
+    if (this._voidCallback != null) {
+      this._voidCallback!();
     }
   }
 
-  String getText() {
-    return _text;
+  Post getPost() {
+    if (_post == null) {
+      return Post('', '', '');
+    }
+    return this._post!;
   }
 
   bool getShowWelcomePage() {
@@ -187,8 +219,8 @@ class EditorController {
   }
 
   void sendTextToListener(String text) {
-    if (_stringCallback != null) {
-      _stringCallback!(text);
+    if (this._stringCallback != null) {
+      this._stringCallback!(text);
     }
   }
 }

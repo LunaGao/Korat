@@ -36,10 +36,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
     editorController.addListener((text) {
       previewController.setDisplayValue(text);
     });
-    postListController.addListener((text) {
+    postListController.addListener((post) {
       editorController.reset();
-      editorController.setText(text);
-      previewController.setDisplayValue(text);
+      editorController.setPost(post);
+      previewController.setDisplayValue(
+        post == null ? '' : post.value,
+      );
     });
     getData();
   }
@@ -74,6 +76,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
             platformModel.bucket,
           );
           postListController.setStorePlatform(oss!);
+          editorController.setStorePlatform(oss!);
         }
       }
     } else {
