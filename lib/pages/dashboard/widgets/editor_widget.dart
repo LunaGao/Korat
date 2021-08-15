@@ -62,10 +62,10 @@ class _EditorWidgetState extends State<EditorWidget> {
                           var result = await widget.editorController
                               .getPlatform()
                               .putObject(
-                                  widget.editorController.getPost().fileName,
-                                  textEditingController.text);
+                                widget.editorController.getPost().fileName,
+                                textEditingController.text,
+                              );
                           if (result.isSuccess) {
-                            print(result.message);
                             EasyLoading.showSuccess("保存成功！");
                           } else {
                             print(result.errorMessage);

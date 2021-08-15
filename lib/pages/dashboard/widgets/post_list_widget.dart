@@ -20,6 +20,7 @@ class _PostListWidgetState extends State<PostListWidget> {
   bool loading = true;
   bool success = true;
   List<Post> posts = [];
+  int selectedPostIndex = -1;
 
   @override
   void initState() {
@@ -79,7 +80,7 @@ class _PostListWidgetState extends State<PostListWidget> {
         var result =
             await widget.postListController.getPlatform().deleteObject(post);
         if (result.isSuccess) {
-          print(result.message);
+          selectedPostIndex = -1;
           getData();
         } else {
           print(result.errorMessage);
@@ -99,14 +100,21 @@ class _PostListWidgetState extends State<PostListWidget> {
             ? Center(
                 child: CircularProgressIndicator(),
               )
-            : ListView(
+            : Column(
                 children: [
-                  ...postListWidget(),
                   TextButton(
                     onPressed: () {
                       onCreatePost();
                     },
                     child: Text("创建帖子"),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return postItemWidget(index);
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -114,50 +122,49 @@ class _PostListWidgetState extends State<PostListWidget> {
     );
   }
 
-  List<Widget> postListWidget() {
-    List<Widget> returnValue = [];
-    for (var post in posts) {
-      var postItem = ListTile(
-        onTap: () async {
-          ResponseModel<Post> responseModel =
-              await widget.postListController.getPlatform().getObject(post);
-          if (responseModel.isSuccess) {
-            widget.postListController.onClickPostTitle(responseModel.message);
-          } else {
-            widget.postListController.onClickPostTitle(null);
-            EasyLoading.showError("载入错误");
-            getData();
+  Widget postItemWidget(int index) {
+    return ListTile(
+      selected: selectedPostIndex == index,
+      onTap: () async {
+        ResponseModel<Post> responseModel = await widget.postListController
+            .getPlatform()
+            .getObject(posts[index]);
+        if (responseModel.isSuccess) {
+          selectedPostIndex = index;
+          widget.postListController.onClickPostTitle(responseModel.message);
+        } else {
+          selectedPostIndex = -1;
+          widget.postListController.onClickPostTitle(null);
+          EasyLoading.showError("载入错误");
+          getData();
+        }
+        setState(() {});
+      },
+      title: Text(posts[index].displayFileName),
+      trailing: PopupMenuButton<String>(
+        child: Icon(Icons.more_vert),
+        onSelected: (value) {
+          if (value == 'delete') {
+            onDeletePost(posts[index]);
           }
-          setState(() {});
         },
-        title: Text(post.displayFileName),
-        trailing: PopupMenuButton<String>(
-          child: Icon(Icons.more_vert),
-          onSelected: (value) {
-            if (value == 'delete') {
-              onDeletePost(post);
-            }
-          },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-            PopupMenuItem(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Icon(
-                    Icons.delete_forever_outlined,
-                    color: Colors.red,
-                  ),
-                  Text('删除'),
-                ],
-              ),
-              value: 'delete',
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          PopupMenuItem(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Icon(
+                  Icons.delete_forever_outlined,
+                  color: Colors.red,
+                ),
+                Text('删除'),
+              ],
             ),
-          ],
-        ),
-      );
-      returnValue.add(postItem);
-    }
-    return returnValue;
+            value: 'delete',
+          ),
+        ],
+      ),
+    );
   }
 }
 
