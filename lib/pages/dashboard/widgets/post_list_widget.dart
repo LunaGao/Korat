@@ -1,9 +1,9 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
 import 'package:korat/api/base_model/post.dart';
 import 'package:korat/api/base_model/response_model.dart';
+import 'package:korat/models/platform_client.dart';
 
 class PostListWidget extends StatefulWidget {
   final PostListController postListController;
@@ -186,18 +186,18 @@ class _PostListWidgetState extends State<PostListWidget> {
 }
 
 class PostListController {
-  AliyunOSSClient? _platform;
+  PlatformClient? _platform;
   PostCallback? _postCallback;
   VoidCallback? _postListListener;
 
-  void setStorePlatform(AliyunOSSClient oss) {
+  void setStorePlatform(PlatformClient oss) {
     this._platform = oss;
     if (this._postListListener != null) {
       this._postListListener!();
     }
   }
 
-  AliyunOSSClient getPlatform() {
+  PlatformClient getPlatform() {
     return this._platform!;
   }
 

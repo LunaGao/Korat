@@ -2,27 +2,24 @@ import 'package:dio/dio.dart';
 import 'package:korat/api/aliyun_oss/utils.dart';
 import 'package:korat/api/base_model/post.dart';
 import 'package:korat/api/base_model/response_model.dart';
+import 'package:korat/models/platform.dart';
+import 'package:korat/models/platform_client.dart';
 import 'package:xml/xml.dart';
 
-class AliyunOSSClient {
-  late String endpoint;
-  late String accessKey;
-  late String accessSecret;
-  late String bucket;
+class AliyunOSSClient extends PlatformClient {
+  final PlatformModel platformModel;
+  late String baseUrl;
 
-  AliyunOSSClient(
-      String accessKey, String accessSecret, String endpoint, String bucket) {
-    this.endpoint = endpoint;
-    this.accessKey = accessKey;
-    this.accessSecret = accessSecret;
-    this.bucket = bucket;
+  AliyunOSSClient(this.platformModel) {
+    this.baseUrl = "http://${platformModel.bucket}.${platformModel.endPoint}/";
   }
 
+  @override
   Future<ResponseModel<List<Post>>> listObjects() async {
     var options = _getOptions('GET');
     try {
       var response = await Dio().get(
-        "http://$bucket.$endpoint/?list-type=2&prefix=korat/",
+        "${this.baseUrl}?list-type=2&prefix=korat/",
         options: options,
       );
       if (200 <= response.statusCode! && response.statusCode! < 300) {
@@ -49,6 +46,7 @@ class AliyunOSSClient {
     }
   }
 
+  @override
   Future<ResponseModel<String>> putObject(
       String fileNamePath, String value) async {
     var options = _getOptions(
@@ -58,7 +56,7 @@ class AliyunOSSClient {
     );
     try {
       var response = await Dio().put(
-        "http://$bucket.$endpoint/$fileNamePath",
+        "${this.baseUrl}$fileNamePath",
         options: options,
         data: value,
       );
@@ -76,6 +74,7 @@ class AliyunOSSClient {
     }
   }
 
+  @override
   Future<ResponseModel<Post>> getObject(Post post) async {
     var options = _getOptions(
       'GET',
@@ -84,7 +83,7 @@ class AliyunOSSClient {
     );
     try {
       var response = await Dio().get(
-        "http://$bucket.$endpoint/${post.fileName}",
+        "${this.baseUrl}${post.fileName}",
         options: options,
       );
       if (200 <= response.statusCode! && response.statusCode! < 300) {
@@ -106,6 +105,7 @@ class AliyunOSSClient {
     }
   }
 
+  @override
   Future<ResponseModel<String>> deleteObject(Post post) async {
     var options = _getOptions(
       'DELETE',
@@ -113,7 +113,7 @@ class AliyunOSSClient {
     );
     try {
       var response = await Dio().delete(
-        "http://$bucket.$endpoint/${post.fileName}",
+        "${this.baseUrl}${post.fileName}",
         options: options,
       );
       if (200 <= response.statusCode! && response.statusCode! < 300) {
@@ -131,51 +131,13 @@ class AliyunOSSClient {
     }
   }
 
-  // /// start multipart upload
-  // ///
-  // ///
-  // HttpRequest initMultipartUpload(String bucketName, String fileKey) {
-  //   final url = "https://${bucketName}.${this.endpoint}/${fileKey}?uploads";
-  //   final headers = {'content-type': "application/xml"};
-  //   HttpRequest req = new HttpRequest(url, 'POST', {}, headers);
-  //   this._auth.signRequest(req, bucketName, fileKey);
-  //   return req;
-  // }
+  @override
+  void setPlatformModel(PlatformModel platformModel) {}
 
-  // HttpRequest uploadPart(String bucketName, String fileKey, String uploadId,
-  //     int partNumber, List<int> data) {
-  //   final url = "https://${bucketName}.${this.endpoint}/${fileKey}";
-  //   final params = {"partNumber": '$partNumber', "uploadId": uploadId};
-  //   HttpRequest req = new HttpRequest(url, 'PUT', params, {});
-  //   req.fileData = data;
-  //   this._auth.signRequest(req, bucketName, fileKey);
-  //   return req;
-  // }
-
-  // HttpRequest completePartUpload(
-  //     String bucketName, String fileKey, String uploadId, List<String> etags) {
-  //   final url = "https://${bucketName}.${this.endpoint}/${fileKey}";
-  //   final params = {"uploadId": uploadId};
-  //   final builder = XmlBuilder();
-  //   builder.element("CompleteMultipartUpload", nest: () {
-  //     for (var i = 0; i < etags.length; i++) {
-  //       builder.element("Part", nest: () {
-  //         builder.element("PartNumber", nest: () {
-  //           builder.text("${i + 1}");
-  //         });
-  //         builder.element("ETag", nest: () {
-  //           builder.text("${etags[i]}");
-  //         });
-  //       });
-  //     }
-  //   });
-  //   HttpRequest req = new HttpRequest(url, 'POST', params, {});
-  //   final xml_request = builder.buildDocument().toXmlString();
-  //   print("XML Request:$xml_request");
-  //   req.fileData = utf8.encode(xml_request);
-  //   this._auth.signRequest(req, bucketName, fileKey);
-  //   return req;
-  // }
+  @override
+  PlatformModel getPlatformModel() {
+    return this.platformModel;
+  }
 
   Options _getOptions(
     String httpMethod, {
@@ -184,8 +146,8 @@ class AliyunOSSClient {
   }) {
     var date = httpDateNow();
     var authorization = getAuthorization(
-      this.accessKey,
-      this.accessSecret,
+      this.platformModel.keyId,
+      this.platformModel.keySecret,
       httpMethod,
       date,
       contentType: contentType,

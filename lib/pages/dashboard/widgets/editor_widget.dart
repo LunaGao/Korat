@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
 import 'package:korat/api/base_model/post.dart';
+import 'package:korat/models/platform_client.dart';
 
 class EditorWidget extends StatefulWidget {
   final EditorController editorController;
@@ -175,13 +175,13 @@ class EditorController {
   VoidCallback? _voidCallback;
   Post? _post;
   bool _showWelcomePage = true;
-  AliyunOSSClient? _platform;
+  PlatformClient? _platform;
 
-  void setStorePlatform(AliyunOSSClient oss) {
+  void setStorePlatform(PlatformClient oss) {
     this._platform = oss;
   }
 
-  AliyunOSSClient getPlatform() {
+  PlatformClient getPlatform() {
     return this._platform!;
   }
 
