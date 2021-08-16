@@ -19,7 +19,6 @@ class BaseApi {
         options: options,
         queryParameters: data,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
@@ -48,7 +47,6 @@ class BaseApi {
         data: data,
         options: options,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
@@ -80,7 +78,6 @@ class BaseApi {
         options: options,
         queryParameters: data,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {
@@ -111,7 +108,6 @@ class BaseApi {
         data: data,
         options: options,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<dynamic>(isSuccess: true, message: response.data);
       } else {

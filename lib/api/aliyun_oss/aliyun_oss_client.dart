@@ -54,7 +54,7 @@ class AliyunOSSClient {
     var options = _getOptions(
       'PUT',
       file: fileNamePath,
-      contentType: "text/plain",
+      contentType: "text/plain;charset=utf-8",
     );
     try {
       var response = await Dio().put(
@@ -80,7 +80,7 @@ class AliyunOSSClient {
     var options = _getOptions(
       'GET',
       file: post.fileName,
-      contentType: "text/plain",
+      contentType: "text/plain;charset=utf-8",
     );
     try {
       var response = await Dio().get(
@@ -116,7 +116,6 @@ class AliyunOSSClient {
         "http://$bucket.$endpoint/${post.fileName}",
         options: options,
       );
-      print(response);
       if (200 <= response.statusCode! && response.statusCode! < 300) {
         return ResponseModel<String>(isSuccess: true, message: '');
       } else {
@@ -184,21 +183,19 @@ class AliyunOSSClient {
     String contentType = '',
   }) {
     var date = httpDateNow();
-    print(date);
     var authorization = getAuthorization(
       this.accessKey,
       this.accessSecret,
       httpMethod,
       date,
-      contentType: 'text/plain',
+      contentType: contentType,
       path: file,
     );
-    print(authorization);
     var headers = {
       'x-oss-date': date,
       'Authorization': authorization,
       'Connection': 'keep-alive',
-      'Content-Type': 'text/plain',
+      'Content-Type': contentType,
     };
 
     return Options(

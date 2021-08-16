@@ -59,9 +59,12 @@ class PreviewController {
 
   PreviewController();
 
-  void setDisplayValue(String displayValue) {
+  void setDisplayValue(
+    String displayValue, {
+    bool showWelcomePage = false,
+  }) {
     this._displayValue = displayValue;
-    this._showWelcomePage = false;
+    this._showWelcomePage = showWelcomePage;
     if (_displayListener != null) {
       _displayListener!();
     }

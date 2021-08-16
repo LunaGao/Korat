@@ -41,6 +41,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
       editorController.setPost(post);
       previewController.setDisplayValue(
         post == null ? '' : post.value,
+        showWelcomePage: post == null,
       );
     });
     getData();
@@ -56,7 +57,6 @@ class _DashBoardPageState extends State<DashBoardPage> {
     user = meResponse.message!;
 
     var platformResponse = await PlatformApi().getMyPlatforms(user.objectId);
-    print(platformResponse);
     if (platformResponse.isSuccess) {
       if (platformResponse.message['results'].length == 0) {
         Navigator.of(context).pushNamed(AppRoute.create_platform_guide);

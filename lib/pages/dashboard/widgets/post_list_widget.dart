@@ -21,6 +21,7 @@ class _PostListWidgetState extends State<PostListWidget> {
   bool success = true;
   List<Post> posts = [];
   int selectedPostIndex = -1;
+  String selectedPostFileNamePath = '';
 
   @override
   void initState() {
@@ -36,6 +37,13 @@ class _PostListWidgetState extends State<PostListWidget> {
     var result = await widget.postListController.getPlatform().listObjects();
     if (result.isSuccess) {
       posts = result.message!;
+      posts.asMap().forEach((index, value) {
+        if (value.fileName == this.selectedPostFileNamePath) {
+          this.selectedPostIndex = index;
+          widget.postListController.onClickPostTitle(value);
+        }
+      });
+      this.selectedPostFileNamePath = '';
       success = true;
     } else {
       success = false;
@@ -54,15 +62,17 @@ class _PostListWidgetState extends State<PostListWidget> {
         DialogTextField(),
       ],
     ).then((value) async {
-      print(value);
       if (value != null && value.length != 0) {
-        var result = await widget.postListController
-            .getPlatform()
-            .putObject('korat/' + value[0] + '.md', ' ');
+        String fileNamePath = 'korat/${value[0]}.md';
+        this.selectedPostFileNamePath = fileNamePath;
+        var result = await widget.postListController.getPlatform().putObject(
+              fileNamePath,
+              ' ',
+            );
         if (result.isSuccess) {
-          print(result.message);
           getData();
         } else {
+          this.selectedPostFileNamePath = '';
           print(result.errorMessage);
           EasyLoading.showError(result.errorMessage);
         }
@@ -75,13 +85,14 @@ class _PostListWidgetState extends State<PostListWidget> {
       title: "是否删除？",
       context: context,
     ).then((value) async {
-      print(value);
       if (value == OkCancelResult.ok) {
         var result =
             await widget.postListController.getPlatform().deleteObject(post);
         if (result.isSuccess) {
           selectedPostIndex = -1;
           getData();
+          widget.postListController.onClickPostTitle(null);
+          EasyLoading.showSuccess("删除成功");
         } else {
           print(result.errorMessage);
           EasyLoading.showError(result.errorMessage);
@@ -140,7 +151,13 @@ class _PostListWidgetState extends State<PostListWidget> {
         }
         setState(() {});
       },
-      title: Text(posts[index].displayFileName),
+      title: Text(
+        posts[index].displayFileName,
+        style: TextStyle(
+          fontWeight:
+              selectedPostIndex == index ? FontWeight.w500 : FontWeight.w400,
+        ),
+      ),
       trailing: PopupMenuButton<String>(
         child: Icon(Icons.more_vert),
         onSelected: (value) {
