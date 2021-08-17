@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:korat/api/base_model/user.dart';
 import 'package:korat/api/leancloud/platform_group_api.dart';
 import 'package:korat/models/platform_group.dart';
+import 'package:korat/routes/app_routes.dart';
 
 class PlatformGroupEditorPage extends StatefulWidget {
   const PlatformGroupEditorPage({Key? key}) : super(key: key);
@@ -16,85 +17,18 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
   PlatformGroup _platformGroup = PlatformGroup('');
   bool _isFirstJoinIn = false;
   late User _user;
-  bool a = false;
-  late List<Step> _steps;
   int _currentIndex = 0;
-  List<bool> _complates = [
-    false,
-    false,
-    false,
-  ];
+  bool _complateStep0 = false;
   TextEditingController _step1TextEditingController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _steps = [
-      step1(),
-      step2(),
-      step3(),
-    ];
-  }
-
-  Step step1() {
-    return Step(
-      isActive: true,
-      title: Text('请输入平台组名字'),
-      state: StepState.editing,
-      content: Container(
-        alignment: Alignment.centerLeft,
-        child: _complates[0]
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _platformGroup.name,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        this._complates[0] = false;
-                      });
-                    },
-                    icon: Icon(
-                      Icons.edit,
-                      color: Colors.blue,
-                    ),
-                  )
-                ],
-              )
-            : Container(
-                width: 500,
-                child: TextFormField(
-                  controller: this._step1TextEditingController,
-                  maxLines: 1,
-                ),
-              ),
-      ),
-    );
-  }
-
-  Step step2() {
-    return Step(
-      isActive: false,
-      state: StepState.disabled,
-      title: Text('添加数据平台'),
-      content: Text('Content for Step 2'),
-    );
-  }
-
-  Step step3() {
-    return Step(
-      isActive: false,
-      state: StepState.disabled,
-      title: Text('添加发布平台'),
-      content: Text('Content for Step 2'),
-    );
   }
 
   void nextStep() async {
     if (this._currentIndex == 0) {
-      if (this._complates[this._currentIndex]) {
+      if (this._complateStep0) {
         goToStep(this._currentIndex + 1);
       } else {
         var nameResponse = await PlatformGroupApi().putPlatformName(
@@ -102,10 +36,13 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
           this._user.objectId,
         );
       }
+    } else {
+      this._currentIndex != 2 ? goToStep(this._currentIndex + 1) : finished();
     }
-    this._currentIndex + 1 != this._steps.length
-        ? goToStep(this._currentIndex + 1)
-        : setState(() => this._complates[this._currentIndex] = true);
+  }
+
+  void finished() {
+    Navigator.of(context).pushReplacementNamed(AppRoute.dashboard);
   }
 
   void cancel() {
@@ -130,8 +67,9 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
         break;
       case PlatformGroupType.modify:
         this._title = "修改平台组";
+        this._complateStep0 = true;
         this._platformGroup = args.platformGroup!;
-        _complates[0] = true;
+        this._step1TextEditingController.text = this._platformGroup.name;
         break;
       case PlatformGroupType.first:
         this._title = "创建平台组";
@@ -169,9 +107,69 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
           onStepCancel: cancel,
           onStepContinue: nextStep,
           onStepTapped: (stepIndex) => goToStep(stepIndex),
-          steps: this._steps,
+          steps: this._getSteps(),
         ),
       ],
+    );
+  }
+
+  List<Step> _getSteps() {
+    return [
+      _step1(),
+      _step2(),
+      _step3(),
+    ];
+  }
+
+  Step _step1() {
+    return Step(
+      title: Text('请输入平台组名字'),
+      content: Container(
+        alignment: Alignment.centerLeft,
+        child: _complateStep0
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _platformGroup.name,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      //TODO: 这里不能变
+                      setState(() {
+                        this._complateStep0 = false;
+                        this._currentIndex = 0;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.edit,
+                      color: Colors.blue,
+                    ),
+                  )
+                ],
+              )
+            : Container(
+                width: 500,
+                child: TextFormField(
+                  controller: this._step1TextEditingController,
+                  maxLines: 1,
+                ),
+              ),
+      ),
+    );
+  }
+
+  Step _step2() {
+    return Step(
+      title: Text('添加数据平台'),
+      content: Text('Content for Step 2'),
+    );
+  }
+
+  Step _step3() {
+    return Step(
+      title: Text('添加发布平台'),
+      content: Text('Content for Step 2'),
     );
   }
 }
