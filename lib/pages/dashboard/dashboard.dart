@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/base_model/user.dart';
 import 'package:korat/api/leancloud/platform_api.dart';
+import 'package:korat/api/leancloud/platform_group_api.dart';
 import 'package:korat/api/leancloud/user_api.dart';
 import 'package:korat/models/platform_client.dart';
+import 'package:korat/models/platform_group.dart';
+import 'package:korat/pages/dashboard/widgets/dashboard_appbar.dart';
+import 'package:korat/pages/platform/platform_group/platform_group_editor.dart';
 import 'package:korat/pages/dashboard/widgets/editor_widget.dart';
 import 'package:korat/pages/dashboard/widgets/post_list_widget.dart';
 import 'package:korat/pages/dashboard/widgets/preview_widget.dart';
@@ -23,6 +27,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
   User user = User();
   bool emptyPlatform = false;
   PlatformClient? platformClient;
+  AppbarController appbarController = AppbarController();
   EditorController editorController = EditorController();
   PostListController postListController = PostListController();
   PreviewController previewController = PreviewController();
@@ -41,32 +46,65 @@ class _DashBoardPageState extends State<DashBoardPage> {
         showWelcomePage: post == null,
       );
     });
-    getData();
+    appbarController.addUserListener((user) {
+      this.user = user;
+      getData();
+    });
+    appbarController.addChangePlatformGroupCallback((platformGroup) {
+      if (platformGroup.dataPlatformId == '') {
+        Navigator.of(context).popAndPushNamed(
+          AppRoute.platform_group_editor,
+          arguments: PlatformGroupPageArguments(
+            PlatformGroupType.modify,
+            this.user,
+            platformGroup: platformGroup,
+          ),
+        );
+      }
+    });
   }
 
   void getData() async {
-    var meResponse = await UserApi().me();
-    if (!meResponse.isSuccess) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.remove('sessionToken');
-      Navigator.of(context).pushReplacementNamed(AppRoute.home);
-    }
-    user = meResponse.message!;
-
-    var platformResponse = await PlatformApi().getMyPlatforms(user.objectId);
-    if (platformResponse.isSuccess) {
-      if (platformResponse.message['results'].length == 0) {
-        Navigator.of(context).pushNamed(AppRoute.create_platform_guide);
+    var platformGroupsResponse =
+        await PlatformGroupApi().getMyPlatformGroups(user.objectId);
+    if (platformGroupsResponse.isSuccess) {
+      if (platformGroupsResponse.message!.length == 0) {
+        Navigator.of(context).popAndPushNamed(
+          AppRoute.platform_group_editor,
+          arguments: PlatformGroupPageArguments(
+            PlatformGroupType.first,
+            this.user,
+          ),
+        );
         return;
       } else {
-        var platformJson = platformResponse.message['results'][0];
-        platformClient = getPlatformClient(platformJson);
-        postListController.setStorePlatform(platformClient!);
-        editorController.setStorePlatform(platformClient!);
+        appbarController.setPlatformGroups(platformGroupsResponse.message!);
+        // for (PlatformGroup platformGroup in platformGroupsResponse.message!) {
+        //   if (platformGroup.dataPlatformId == null) {}
+        // }
+        // var platformJson = platformGroupsResponse.message['results'][0];
+        // platformClient = getPlatformClient(platformJson);
+        // postListController.setStorePlatform(platformClient!);
+        // editorController.setStorePlatform(platformClient!);
       }
     } else {
-      EasyLoading.showError(platformResponse.errorMessage);
+      EasyLoading.showError(platformGroupsResponse.errorMessage);
     }
+
+    // var platformResponse = await PlatformApi().getMyPlatforms(user.objectId);
+    // if (platformResponse.isSuccess) {
+    //   if (platformResponse.message['results'].length == 0) {
+    //     Navigator.of(context).pushNamed(AppRoute.create_platform_guide);
+    //     return;
+    //   } else {
+    //     var platformJson = platformResponse.message['results'][0];
+    //     platformClient = getPlatformClient(platformJson);
+    //     postListController.setStorePlatform(platformClient!);
+    //     editorController.setStorePlatform(platformClient!);
+    //   }
+    // } else {
+    //   EasyLoading.showError(platformResponse.errorMessage);
+    // }
     loading = false;
     setState(() {});
   }
@@ -74,36 +112,8 @@ class _DashBoardPageState extends State<DashBoardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Text("操作台"),
-            Text(
-              "    " +
-                  (platformClient == null
-                      ? ""
-                      : platformClient!.getPlatformModel().bucket),
-            ),
-          ],
-        ),
-        backwardsCompatibility: false,
-        actions: [
-          TextButton(
-            onPressed: () {
-              SharedPreferences.getInstance().then((prefs) {
-                prefs.remove('sessionToken');
-                prefs.remove('currentUserId');
-                Navigator.of(context).pushReplacementNamed(AppRoute.home);
-              });
-            },
-            child: Text(
-              "退出",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
+      appBar: DashboardAppBar(
+        appbarController: appbarController,
       ),
       body: loading
           ? Center(
