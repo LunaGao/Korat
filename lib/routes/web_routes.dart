@@ -1,8 +1,6 @@
 import 'dart:js';
 
 import 'package:flutter/material.dart';
-import 'package:korat/pages/platform/add_platform/create_platfrom_guide.dart';
-import 'package:korat/pages/platform/add_platform/platform_add_aliyun_oss.dart';
 import 'package:korat/pages/platform/platform/platform_editor.dart';
 import 'package:korat/pages/platform/platform_group/platform_group_editor.dart';
 import 'package:korat/pages/dashboard/dashboard.dart';
@@ -21,8 +19,6 @@ class WebRoute {
       AppRoute.signup: (context) => SignUpPage(),
       AppRoute.dashboard: (context) => DashBoardPage(),
       AppRoute.platform_group_editor: (context) => PlatformGroupEditorPage(),
-      AppRoute.platform_add_aliyun_oss: (context) => PlatformAddAliyunOSSPage(),
-      AppRoute.create_platform_guide: (context) => CreatePlatformGuidePage(),
       AppRoute.platform_group_list: (context) => PlatformGroupList(),
       AppRoute.platform_editor: (context) => PlatformEditor(),
     };

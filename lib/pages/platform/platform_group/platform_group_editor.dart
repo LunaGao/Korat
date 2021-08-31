@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/platform_group_api.dart';
 import 'package:korat/common/global.dart';
-import 'package:korat/config/platform_config.dart';
+import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/platform_group.dart';
+import 'package:korat/pages/platform/platform/platform_editor.dart';
+import 'package:korat/routes/app_routes.dart';
 
 class PlatformGroupEditorPage extends StatefulWidget {
   const PlatformGroupEditorPage({Key? key}) : super(key: key);
@@ -15,11 +18,12 @@ class PlatformGroupEditorPage extends StatefulWidget {
 }
 
 class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
+  bool _isLoading = true;
   String _title = '';
-  List<String> platformList = [
-    '请选择平台',
-    PlatformConfig.aliyunOSS,
-  ];
+  String _defaultPlatformItem = '请选择平台';
+  String _addPlatformItem = '创建平台';
+  List<PlatformModel> platforms = [];
+  List<String> platformDisplayList = [];
   PlatformGroupPageArguments? _arg;
   String _dataSelectedValue = '';
   String _publishSelectedValue = '';
@@ -27,28 +31,31 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
   bool _isFirstJoinIn = false;
   TextEditingController _groupNameTextEditingController =
       TextEditingController();
-  TextEditingController _dataBucketTextEditingController =
-      TextEditingController();
-  TextEditingController _dataEndPointTextEditingController =
-      TextEditingController();
-  TextEditingController _dataKeyIdTextEditingController =
-      TextEditingController();
-  TextEditingController _dataKeySecretTextEditingController =
-      TextEditingController();
-  TextEditingController _publishBucketTextEditingController =
-      TextEditingController();
-  TextEditingController _publishEndPointTextEditingController =
-      TextEditingController();
-  TextEditingController _publishKeyIdTextEditingController =
-      TextEditingController();
-  TextEditingController _publishKeySecretTextEditingController =
-      TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    this._dataSelectedValue = platformList[0];
-    this._publishSelectedValue = platformList[0];
+    this._dataSelectedValue = _defaultPlatformItem;
+    this._publishSelectedValue = _defaultPlatformItem;
+    getData();
+  }
+
+  void getData() async {
+    var platformsResponse =
+        await PlatformApi().getMyPlatforms(Global.user!.objectId);
+    if (platformsResponse.isSuccess) {
+      platforms = platformsResponse.message!;
+      platformDisplayList.clear();
+      platformDisplayList.add(_defaultPlatformItem);
+      platformDisplayList.addAll(platforms
+          .map<String>((e) => getDropDownItemString(e.objectId, e.platform)));
+      platformDisplayList.add(_addPlatformItem);
+      setState(() {
+        _isLoading = false;
+      });
+    } else {
+      EasyLoading.showError(platformsResponse.errorMessage);
+    }
   }
 
   void finished() async {
@@ -92,28 +99,14 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
           this._platformGroup = _arg!.platformGroup!;
           this._groupNameTextEditingController.text = this._platformGroup.name;
           if (this._platformGroup.dataPlatform != null) {
-            this._dataSelectedValue =
-                this._platformGroup.dataPlatform!.platform;
-            this._dataBucketTextEditingController.text =
-                this._platformGroup.dataPlatform!.bucket;
-            this._dataEndPointTextEditingController.text =
-                this._platformGroup.dataPlatform!.endPoint;
-            this._dataKeyIdTextEditingController.text =
-                this._platformGroup.dataPlatform!.keyId;
-            this._dataKeySecretTextEditingController.text =
-                this._platformGroup.dataPlatform!.keySecret;
+            this._dataSelectedValue = getDropDownItemString(
+                this._platformGroup.dataPlatform!.objectId,
+                this._platformGroup.dataPlatform!.platform);
           }
           if (this._platformGroup.publishPlatform != null) {
-            this._publishSelectedValue =
-                this._platformGroup.publishPlatform!.platform;
-            this._publishBucketTextEditingController.text =
-                this._platformGroup.publishPlatform!.bucket;
-            this._publishEndPointTextEditingController.text =
-                this._platformGroup.publishPlatform!.endPoint;
-            this._publishKeyIdTextEditingController.text =
-                this._platformGroup.publishPlatform!.keyId;
-            this._publishKeySecretTextEditingController.text =
-                this._platformGroup.publishPlatform!.keySecret;
+            this._publishSelectedValue = getDropDownItemString(
+                this._platformGroup.publishPlatform!.objectId,
+                this._platformGroup.publishPlatform!.platform);
           }
           break;
         case PlatformGroupType.first:
@@ -180,32 +173,12 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
     return _group(
       '添加数据平台',
       [
-        _dropDownButton(
-          0,
-        ),
-        _dataSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "Bucket",
-                this._dataBucketTextEditingController,
-              ),
-        _dataSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "End point",
-                this._dataEndPointTextEditingController,
-              ),
-        _dataSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "Key Id",
-                this._dataKeyIdTextEditingController,
-              ),
-        _dataSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "Key Secret",
-                this._dataKeySecretTextEditingController,
+        _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : _dropDownButton(
+                0,
               ),
       ],
     );
@@ -215,32 +188,12 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
     return _group(
       '添加发布平台',
       [
-        _dropDownButton(
-          1,
-        ),
-        this._publishSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "Bucket",
-                this._publishBucketTextEditingController,
-              ),
-        this._publishSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "End point",
-                this._publishEndPointTextEditingController,
-              ),
-        this._publishSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "Key Id",
-                this._publishKeyIdTextEditingController,
-              ),
-        this._publishSelectedValue == '请选择平台'
-            ? Container()
-            : _inputBox(
-                "Key Secret",
-                this._publishKeySecretTextEditingController,
+        _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : _dropDownButton(
+                1,
               ),
       ],
     );
@@ -272,17 +225,24 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
       padding: const EdgeInsets.all(8.0),
       child: DropdownButton<String>(
         value: index == 0 ? _dataSelectedValue : _publishSelectedValue,
-        items: this.platformList.map<DropdownMenuItem<String>>((String value) {
+        items: this
+            .platformDisplayList
+            .map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
-            child: Text(
-              value == '请选择平台'
-                  ? '请选择平台'
-                  : getDisplayPlatformNameFromString(value),
-            ),
+            child: Text(value),
           );
         }).toList(),
         onChanged: (String? value) {
+          if (value == _addPlatformItem) {
+            Navigator.of(context).pushNamed(
+              AppRoute.platform_editor,
+              arguments: PlatformPageArguments(
+                PlatformType.create,
+              ),
+            );
+            return;
+          }
           setState(() {
             index == 0
                 ? _dataSelectedValue = value!
@@ -307,6 +267,10 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
         ),
       ),
     );
+  }
+
+  String getDropDownItemString(String objectId, String platform) {
+    return objectId + " [" + getDisplayPlatformNameFromString(platform) + "]";
   }
 }
 

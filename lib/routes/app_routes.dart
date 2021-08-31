@@ -44,6 +44,4 @@ class AppRoute {
   static const String platform_group_editor = '/platform_group_editor';
   static const String platform_editor = '/platform_editor';
   static const String platform_group_list = '/platform_groups';
-  static const String create_platform_guide = '/guide';
-  static const String platform_add_aliyun_oss = '/platform_add_aliyun_oss';
 }

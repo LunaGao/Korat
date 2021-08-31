@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/leancloud/platform_api.dart';
+import 'package:korat/common/global.dart';
 import 'package:korat/config/platform_config.dart';
 import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
@@ -12,6 +14,7 @@ class PlatformEditor extends StatefulWidget {
 }
 
 class _PlatformEditorState extends State<PlatformEditor> {
+  bool _isLoading = true;
   String _title = '';
   List<String> platformList = [
     '请选择平台',
@@ -35,26 +38,78 @@ class _PlatformEditorState extends State<PlatformEditor> {
     this._selectedValue = platformList[0];
   }
 
+  void getData(String objectId) async {
+    var response = await PlatformApi().getPlatformById(objectId);
+    if (response.isSuccess) {
+      this._platformModel = response.message;
+      this._selectedValue = this._platformModel!.platform;
+      this._dataBucketTextEditingController.text = this._platformModel!.bucket;
+      this._dataEndPointTextEditingController.text =
+          this._platformModel!.endPoint;
+      this._dataKeyIdTextEditingController.text = this._platformModel!.keyId;
+      this._dataKeySecretTextEditingController.text =
+          this._platformModel!.keySecret;
+      _isLoading = false;
+      setState(() {});
+    } else {
+      EasyLoading.showError(response.errorMessage);
+    }
+  }
+
   void finished() async {
     if (_selectedValue == '请选择平台') {
       EasyLoading.showError("没有找到要保存的内容哦");
       return;
     }
-    // if (this._platformGroup.objectId.isEmpty) {
-    //   //创建
-    //   var nameResponse = await PlatformGroupApi().createPlatformName(
-    //     this._groupNameTextEditingController.text,
-    //     Global.user!.objectId,
-    //   );
-    //   Navigator.of(context).pop();
-    // } else {
-    //   //更新
-    //   Navigator.of(context).pop();
-    // }
-    // var nameResponse = await PlatformGroupApi().putPlatformName(
-    //   this._groupNameTextEditingController.text,
-    //   Global.user!.objectId,
-    // );
+    var endpoint = _dataEndPointTextEditingController.text;
+    var bucket = _dataBucketTextEditingController.text;
+    var accessKeyId = _dataKeyIdTextEditingController.text;
+    var accessKeySecret = _dataKeySecretTextEditingController.text;
+    if (endpoint.isEmpty) {
+      EasyLoading.showError("End Point 不可为空哦");
+      return;
+    }
+    if (bucket.isEmpty) {
+      EasyLoading.showError("bucket 不可为空哦");
+      return;
+    }
+    if (accessKeyId.isEmpty) {
+      EasyLoading.showError("accessKeyId 不可为空哦");
+      return;
+    }
+    if (accessKeySecret.isEmpty) {
+      EasyLoading.showError("accessKeySecret 不可为空哦");
+      return;
+    }
+    if (this._platformModel == null) {
+      //创建
+      var response = await PlatformApi().createAliyunOSSPlatform(
+        endpoint,
+        bucket,
+        accessKeyId,
+        accessKeySecret,
+        Global.user!.objectId,
+      );
+      if (response.isSuccess) {
+        Navigator.of(context).pop<bool>(true);
+      } else {
+        EasyLoading.showError(response.errorMessage);
+      }
+    } else {
+      //更新
+      var response = await PlatformApi().updateAliyunOSSPlatform(
+        this._platformModel!.objectId,
+        endpoint,
+        bucket,
+        accessKeyId,
+        accessKeySecret,
+      );
+      if (response.isSuccess) {
+        Navigator.of(context).pop<bool>(true);
+      } else {
+        EasyLoading.showError(response.errorMessage);
+      }
+    }
   }
 
   @override
@@ -65,19 +120,11 @@ class _PlatformEditorState extends State<PlatformEditor> {
       switch (_arg!.type) {
         case PlatformType.create:
           this._title = "创建平台";
+          _isLoading = false;
           break;
         case PlatformType.modify:
           this._title = "修改平台";
-          this._platformModel = _arg!.platformModel!;
-          this._selectedValue = this._platformModel!.platform;
-          this._dataBucketTextEditingController.text =
-              this._platformModel!.bucket;
-          this._dataEndPointTextEditingController.text =
-              this._platformModel!.endPoint;
-          this._dataKeyIdTextEditingController.text =
-              this._platformModel!.keyId;
-          this._dataKeySecretTextEditingController.text =
-              this._platformModel!.keySecret;
+          getData(_arg!.platformModel!.objectId);
           break;
       }
     }
@@ -88,7 +135,11 @@ class _PlatformEditorState extends State<PlatformEditor> {
           this._title,
         ),
       ),
-      body: mainBody(),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : mainBody(),
     );
   }
 

@@ -19,7 +19,7 @@ class PlatformGroupList extends StatefulWidget {
 }
 
 class _PlatformGroupListState extends State<PlatformGroupList> {
-  bool loading = true;
+  bool _isLoading = true;
   List<PlatformGroup> platformGroups = [];
   List<PlatformModel> platforms = [];
 
@@ -45,7 +45,7 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
       EasyLoading.showError(platformsResponse.errorMessage);
     }
 
-    loading = false;
+    _isLoading = false;
     setState(() {});
   }
 
@@ -82,12 +82,21 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(
+                Navigator.of(context)
+                    .pushNamed(
                   AppRoute.platform_editor,
                   arguments: PlatformPageArguments(
                     PlatformType.create,
                   ),
-                );
+                )
+                    .then<bool?>((value) {
+                  if (value != null) {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    getData();
+                  }
+                });
               },
               child: Text(
                 "添加平台",
@@ -148,7 +157,7 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
   Widget mainBody() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: loading
+      child: _isLoading
           ? Center(
               child: CircularProgressIndicator(),
             )
@@ -251,13 +260,22 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
         onPressed: () => removePlatform(index - 1),
       ),
       onTap: () {
-        Navigator.of(context).pushNamed(
+        Navigator.of(context)
+            .pushNamed(
           AppRoute.platform_editor,
           arguments: PlatformPageArguments(
             PlatformType.modify,
             platformModel: platforms[index - 1],
           ),
-        );
+        )
+            .then<bool?>((value) {
+          if (value != null) {
+            setState(() {
+              _isLoading = true;
+            });
+            getData();
+          }
+        });
       },
       title: Text(
         platforms[index - 1].objectId,
