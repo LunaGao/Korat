@@ -51,12 +51,11 @@ class _DashBoardPageState extends State<DashBoardPage> {
       getData();
     });
     appbarController.addChangePlatformGroupCallback((platformGroup) {
-      if (platformGroup.dataPlatformId == '') {
+      if (platformGroup.dataPlatform == null) {
         Navigator.of(context).popAndPushNamed(
           AppRoute.platform_group_editor,
           arguments: PlatformGroupPageArguments(
             PlatformGroupType.modify,
-            this.user,
             platformGroup: platformGroup,
           ),
         );
@@ -73,7 +72,6 @@ class _DashBoardPageState extends State<DashBoardPage> {
           AppRoute.platform_group_editor,
           arguments: PlatformGroupPageArguments(
             PlatformGroupType.first,
-            this.user,
           ),
         );
         return;

@@ -30,3 +30,11 @@ PlatformClient getPlatformClient(dynamic platformJson) {
     );
   }
 }
+
+String getDisplayPlatformNameFromString(String? platformName) {
+  if (platformName == PlatformConfig.aliyunOSS) {
+    return "aliyun oss";
+  } else {
+    return "未设置";
+  }
+}

@@ -1,8 +1,10 @@
+import 'package:korat/models/platform.dart';
+
 class PlatformGroup {
   String objectId = '';
   String name;
-  String dataPlatformId = '';
-  String publishPlatformId = '';
+  PlatformModel? dataPlatform;
+  PlatformModel? publishPlatform;
 
   PlatformGroup(
     this.name,

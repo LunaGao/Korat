@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/common/global.dart';
 import 'package:korat/routes/app_routes.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
+void main() async {
+  await Global.init();
   runApp(MyApp());
 }
 

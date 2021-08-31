@@ -1,12 +1,13 @@
 import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/leancloud/base_api.dart';
+import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_group.dart';
 
 class PlatformGroupApi {
   Future<ResponseModel<List<PlatformGroup>>> getMyPlatformGroups(
       String currentUserId) async {
     var response = await BaseApi().getWithAuth(
-      '/classes/PlatformGroup',
+      '/classes/PlatformGroup?include=dataPlatform,publishPlatform',
       {
         'where': {
           'owner': {
@@ -14,13 +15,13 @@ class PlatformGroupApi {
             "className": "_User",
             "objectId": currentUserId,
           },
-        }
+        },
       },
     );
     return _getListForPlatformGroup(response);
   }
 
-  Future<ResponseModel> putPlatformName(
+  Future<ResponseModel> createPlatformName(
     String name,
     String currentUserId,
   ) async {
@@ -103,10 +104,26 @@ class PlatformGroupApi {
       var platfromGtoup = PlatformGroup(item['name']);
       platfromGtoup.objectId = item['objectId'];
       if (item.containsKey('dataPlatform')) {
-        platfromGtoup.dataPlatformId = item['dataPlatform']['objectId'];
+        PlatformModel platformModel = PlatformModel();
+        platformModel.bucket = item['dataPlatform']['bucket'];
+        platformModel.objectId = item['dataPlatform']['objectId'];
+        platformModel.platform = item['dataPlatform']['platform'];
+        platformModel.keySecret = item['dataPlatform']['keySecret'];
+        platformModel.keyId = item['dataPlatform']['keyId'];
+        platformModel.endPoint = item['dataPlatform']['endPoint'];
+        platformModel.bucket = item['dataPlatform']['bucket'];
+        platfromGtoup.dataPlatform = platformModel;
       }
       if (item.containsKey('publishPlatform')) {
-        platfromGtoup.publishPlatformId = item['publishPlatform']['objectId'];
+        PlatformModel platformModel = PlatformModel();
+        platformModel.bucket = item['publishPlatform']['bucket'];
+        platformModel.objectId = item['publishPlatform']['objectId'];
+        platformModel.platform = item['publishPlatform']['platform'];
+        platformModel.keySecret = item['publishPlatform']['keySecret'];
+        platformModel.keyId = item['publishPlatform']['keyId'];
+        platformModel.endPoint = item['publishPlatform']['endPoint'];
+        platformModel.bucket = item['publishPlatform']['bucket'];
+        platfromGtoup.publishPlatform = platformModel;
       }
       data.add(platfromGtoup);
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:korat/api/base_model/user.dart';
-import 'package:korat/api/leancloud/user_api.dart';
+import 'package:korat/common/global.dart';
 import 'package:korat/models/platform_group.dart';
 import 'package:korat/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,14 +60,11 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
   }
 
   void getUserData() async {
-    var meResponse = await UserApi().me();
-    if (!meResponse.isSuccess) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.remove('sessionToken');
+    if (Global.user != null) {
+      widget.appbarController.getUserListener(Global.user!);
+    } else {
       Navigator.of(context).pushReplacementNamed(AppRoute.home);
     }
-    var user = meResponse.message!;
-    widget.appbarController.getUserListener(user);
   }
 
   @override
@@ -110,7 +107,9 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
                   itemBuilder: (BuildContext context) => popupMenuItems,
                 ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(AppRoute.platform_group_list);
+            },
             child: Text(
               "平台组管理",
               style: TextStyle(
