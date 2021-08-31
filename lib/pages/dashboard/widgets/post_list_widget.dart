@@ -80,6 +80,32 @@ class _PostListWidgetState extends State<PostListWidget> {
     });
   }
 
+  onPublishPost() {
+    showOkCancelAlertDialog(
+      title: "是否发布内容到发布平台？",
+      context: context,
+    ).then((value) async {
+      if (value == OkCancelResult.ok) {
+        EasyLoading.showProgress(
+          0.4,
+          status: "生成中，请勿关闭网页。",
+          maskType: EasyLoadingMaskType.black,
+        );
+        // var result =
+        //     await widget.postListController.getPlatform().deleteObject(post);
+        // if (result.isSuccess) {
+        //   selectedPostIndex = -1;
+        //   getData();
+        //   widget.postListController.onClickPostTitle(null);
+        //   EasyLoading.showSuccess("删除成功");
+        // } else {
+        //   print(result.errorMessage);
+        //   EasyLoading.showError(result.errorMessage);
+        // }
+      }
+    });
+  }
+
   onDeletePost(Post post) {
     showOkCancelAlertDialog(
       title: "是否删除？",
@@ -113,6 +139,12 @@ class _PostListWidgetState extends State<PostListWidget> {
               )
             : Column(
                 children: [
+                  TextButton(
+                    onPressed: () {
+                      onPublishPost();
+                    },
+                    child: Text("发布"),
+                  ),
                   TextButton(
                     onPressed: () {
                       onCreatePost();
