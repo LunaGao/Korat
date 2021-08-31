@@ -151,4 +151,35 @@ class BaseApi {
           isSuccess: false, errorMessage: e.toString());
     }
   }
+
+  Future<ResponseModel<dynamic>> deleteWithAuth(
+      String url, dynamic data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var options = Options(
+      headers: {
+        'X-LC-Id': apiAppId,
+        'X-LC-Key': apiAppKey,
+        'X-LC-Session': prefs.getString('sessionToken'),
+        Headers.contentTypeHeader: Headers.jsonContentType,
+      },
+    );
+    try {
+      var response = await Dio().delete(
+        apiBaseUrl + url,
+        data: data,
+        options: options,
+      );
+      if (200 <= response.statusCode! && response.statusCode! < 300) {
+        return ResponseModel<dynamic>(isSuccess: true, message: response.data);
+      } else {
+        return ResponseModel<dynamic>(isSuccess: false, errorMessage: "");
+      }
+    } on DioError catch (e) {
+      return ResponseModel<dynamic>(
+          isSuccess: false, errorMessage: e.response!.data['error']);
+    } catch (e) {
+      return ResponseModel<dynamic>(
+          isSuccess: false, errorMessage: e.toString());
+    }
+  }
 }

@@ -71,6 +71,15 @@ class PlatformApi {
     );
   }
 
+  Future<ResponseModel> deleteAliyunOSSPlatform(
+    String objectId,
+  ) async {
+    return BaseApi().deleteWithAuth(
+      '/classes/Platform/$objectId',
+      {},
+    );
+  }
+
   ResponseModel<List<PlatformModel>> _getListForPlatform(
     ResponseModel<dynamic> response,
   ) {

@@ -21,66 +21,75 @@ class PlatformGroupApi {
     return _getListForPlatformGroup(response);
   }
 
-  Future<ResponseModel> createPlatformName(
+  Future<ResponseModel> createPlatformGroup(
     String name,
+    String dataPlatformObjectId,
+    String? publishPlatformObjectId,
     String currentUserId,
   ) async {
-    return BaseApi().postWithAuth(
-      '/classes/PlatformGroup',
-      {
-        'name': name,
-        'owner': {
-          "__type": "Pointer",
-          "className": "_User",
-          "objectId": currentUserId,
-        }
+    var data = {
+      'name': name,
+      'dataPlatform': {
+        "__type": "Pointer",
+        "className": "Platform",
+        "objectId": dataPlatformObjectId,
       },
-    );
-  }
-
-  Future<ResponseModel> putDataPlatform(
-    String platformId,
-    String name,
-    String currentUserId,
-  ) async {
-    return BaseApi().postWithAuth(
-      '/classes/PlatformGroup',
-      {
-        'name': name,
-        'dataPlatform': {
-          "__type": "Pointer",
-          "className": "Platform",
-          "objectId": platformId,
-        },
-        'owner': {
-          "__type": "Pointer",
-          "className": "_User",
-          "objectId": currentUserId,
-        }
-      },
-    );
-  }
-
-  Future<ResponseModel> putPublishPlatform(
-    String platformId,
-    String name,
-    String currentUserId,
-  ) async {
-    return BaseApi().postWithAuth(
-      '/classes/PlatformGroup',
-      {
-        'name': name,
+      'owner': {
+        "__type": "Pointer",
+        "className": "_User",
+        "objectId": currentUserId,
+      }
+    };
+    if (publishPlatformObjectId != null) {
+      data.addAll({
         'publishPlatform': {
           "__type": "Pointer",
           "className": "Platform",
-          "objectId": platformId,
+          "objectId": publishPlatformObjectId,
         },
-        'owner': {
-          "__type": "Pointer",
-          "className": "_User",
-          "objectId": currentUserId,
-        }
+      });
+    }
+    return BaseApi().postWithAuth(
+      '/classes/PlatformGroup',
+      data,
+    );
+  }
+
+  Future<ResponseModel> updatePlatformGroup(
+    String objectId,
+    String name,
+    String dataPlatformObjectId,
+    String? publishPlatformObjectId,
+  ) async {
+    var data = {
+      'name': name,
+      'dataPlatform': {
+        "__type": "Pointer",
+        "className": "Platform",
+        "objectId": dataPlatformObjectId,
       },
+    };
+    if (publishPlatformObjectId != null) {
+      data.addAll({
+        'publishPlatform': {
+          "__type": "Pointer",
+          "className": "Platform",
+          "objectId": publishPlatformObjectId,
+        },
+      });
+    }
+    return BaseApi().putWithAuth(
+      '/classes/PlatformGroup/$objectId',
+      data,
+    );
+  }
+
+  Future<ResponseModel> deletePlatformGroup(
+    String objectId,
+  ) async {
+    return BaseApi().deleteWithAuth(
+      '/classes/PlatformGroup/$objectId',
+      {},
     );
   }
 

@@ -70,14 +70,34 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
     }
     if (this._platformGroup.objectId.isEmpty) {
       //创建
-      var nameResponse = await PlatformGroupApi().createPlatformName(
+      var response = await PlatformGroupApi().createPlatformGroup(
         this._groupNameTextEditingController.text,
+        _dataSelectedValue.split(' ')[0],
+        _publishSelectedValue.split(' ').length == 1
+            ? null
+            : _publishSelectedValue.split(' ')[0],
         Global.user!.objectId,
       );
-      Navigator.of(context).pop();
+      if (response.isSuccess) {
+        Navigator.of(context).pop<bool>(true);
+      } else {
+        EasyLoading.showError(response.errorMessage);
+      }
     } else {
       //更新
-      Navigator.of(context).pop();
+      var response = await PlatformGroupApi().updatePlatformGroup(
+        _platformGroup.objectId,
+        this._groupNameTextEditingController.text,
+        _dataSelectedValue.split(' ')[0],
+        _publishSelectedValue.split(' ').length == 1
+            ? null
+            : _publishSelectedValue.split(' ')[0],
+      );
+      if (response.isSuccess) {
+        Navigator.of(context).pop<bool>(true);
+      } else {
+        EasyLoading.showError(response.errorMessage);
+      }
     }
     // var nameResponse = await PlatformGroupApi().putPlatformName(
     //   this._groupNameTextEditingController.text,
@@ -235,12 +255,18 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
         }).toList(),
         onChanged: (String? value) {
           if (value == _addPlatformItem) {
-            Navigator.of(context).pushNamed(
+            Navigator.of(context)
+                .pushNamed(
               AppRoute.platform_editor,
               arguments: PlatformPageArguments(
                 PlatformType.create,
               ),
-            );
+            )
+                .then<bool?>((value) {
+              if (value != null) {
+                getData();
+              }
+            });
             return;
           }
           setState(() {

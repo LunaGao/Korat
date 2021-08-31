@@ -63,12 +63,21 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(
+                Navigator.of(context)
+                    .pushNamed(
                   AppRoute.platform_group_editor,
                   arguments: PlatformGroupPageArguments(
                     PlatformGroupType.create,
                   ),
-                );
+                )
+                    .then<bool?>((value) {
+                  if (value != null) {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    getData();
+                  }
+                });
               },
               child: Text(
                 "添加平台组",
@@ -118,17 +127,15 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
       context: context,
     ).then((value) async {
       if (value == OkCancelResult.ok) {
-        // var result =
-        //     await widget.postListController.getPlatform().deleteObject(post);
-        // if (result.isSuccess) {
-        //   selectedPostIndex = -1;
-        //   getData();
-        //   widget.postListController.onClickPostTitle(null);
-        //   EasyLoading.showSuccess("删除成功");
-        // } else {
-        //   print(result.errorMessage);
-        //   EasyLoading.showError(result.errorMessage);
-        // }
+        var result = await PlatformGroupApi()
+            .deletePlatformGroup(platformGroups[index].objectId);
+        if (result.isSuccess) {
+          getData();
+          EasyLoading.showSuccess("删除成功");
+        } else {
+          print(result.errorMessage);
+          EasyLoading.showError(result.errorMessage);
+        }
       }
     });
   }
@@ -139,17 +146,15 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
       context: context,
     ).then((value) async {
       if (value == OkCancelResult.ok) {
-        // var result =
-        //     await widget.postListController.getPlatform().deleteObject(post);
-        // if (result.isSuccess) {
-        //   selectedPostIndex = -1;
-        //   getData();
-        //   widget.postListController.onClickPostTitle(null);
-        //   EasyLoading.showSuccess("删除成功");
-        // } else {
-        //   print(result.errorMessage);
-        //   EasyLoading.showError(result.errorMessage);
-        // }
+        var result = await PlatformApi()
+            .deleteAliyunOSSPlatform(platforms[index].objectId);
+        if (result.isSuccess) {
+          getData();
+          EasyLoading.showSuccess("删除成功");
+        } else {
+          print(result.errorMessage);
+          EasyLoading.showError(result.errorMessage);
+        }
       }
     });
   }
@@ -195,13 +200,23 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
         onPressed: () => removePlatformGroup(index - 1),
       ),
       onTap: () {
-        Navigator.of(context).pushNamed(
+        Navigator.of(context)
+            .pushNamed(
           AppRoute.platform_group_editor,
           arguments: PlatformGroupPageArguments(
             PlatformGroupType.modify,
             platformGroup: platformGroups[index - 1],
           ),
-        );
+        )
+            .then<bool?>((value) {
+          if (value != null) {
+            setState(() {
+              _isLoading = true;
+            });
+            getData();
+          }
+        });
+        ;
       },
       title: Text(
         platformGroups[index - 1].name,
