@@ -79,7 +79,13 @@ class _PlatformGroupEditorPageState extends State<PlatformGroupEditorPage> {
         Global.user!.objectId,
       );
       if (response.isSuccess) {
-        Navigator.of(context).pop<bool>(true);
+        if (_isFirstJoinIn) {
+          Navigator.of(context).popAndPushNamed(
+            AppRoute.dashboard,
+          );
+        } else {
+          Navigator.of(context).pop<bool>(true);
+        }
       } else {
         EasyLoading.showError(response.errorMessage);
       }

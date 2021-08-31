@@ -12,14 +12,8 @@ abstract class PlatformClient {
   deleteObject(Post post);
 }
 
-PlatformClient getPlatformClient(dynamic platformJson) {
-  PlatformModel platformModel = PlatformModel();
-  platformModel.platform = platformJson['platform'];
-  platformModel.endPoint = platformJson['endPoint'];
-  platformModel.keyId = platformJson['keyId'];
-  platformModel.keySecret = platformJson['keySecret'];
-  platformModel.bucket = platformJson['bucket'];
-  if (platformJson['platform'] == PlatformConfig.aliyunOSS) {
+PlatformClient getPlatformClient(PlatformModel platformModel) {
+  if (platformModel.platform == PlatformConfig.aliyunOSS) {
     return AliyunOSSClient(
       platformModel,
     );

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/base_model/user.dart';
-import 'package:korat/api/leancloud/platform_api.dart';
 import 'package:korat/api/leancloud/platform_group_api.dart';
-import 'package:korat/api/leancloud/user_api.dart';
 import 'package:korat/models/platform_client.dart';
-import 'package:korat/models/platform_group.dart';
 import 'package:korat/pages/dashboard/widgets/dashboard_appbar.dart';
 import 'package:korat/pages/platform/platform_group/platform_group_editor.dart';
 import 'package:korat/pages/dashboard/widgets/editor_widget.dart';
@@ -13,7 +10,6 @@ import 'package:korat/pages/dashboard/widgets/post_list_widget.dart';
 import 'package:korat/pages/dashboard/widgets/preview_widget.dart';
 import 'package:korat/pages/dashboard/widgets/utils_widget.dart';
 import 'package:korat/routes/app_routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DashBoardPage extends StatefulWidget {
   const DashBoardPage({Key? key}) : super(key: key);
@@ -77,32 +73,14 @@ class _DashBoardPageState extends State<DashBoardPage> {
         return;
       } else {
         appbarController.setPlatformGroups(platformGroupsResponse.message!);
-        // for (PlatformGroup platformGroup in platformGroupsResponse.message!) {
-        //   if (platformGroup.dataPlatformId == null) {}
-        // }
-        // var platformJson = platformGroupsResponse.message['results'][0];
-        // platformClient = getPlatformClient(platformJson);
-        // postListController.setStorePlatform(platformClient!);
-        // editorController.setStorePlatform(platformClient!);
+        var dataPlatform = platformGroupsResponse.message![0].dataPlatform!;
+        platformClient = getPlatformClient(dataPlatform);
+        postListController.setStorePlatform(platformClient!);
+        editorController.setStorePlatform(platformClient!);
       }
     } else {
       EasyLoading.showError(platformGroupsResponse.errorMessage);
     }
-
-    // var platformResponse = await PlatformApi().getMyPlatforms(user.objectId);
-    // if (platformResponse.isSuccess) {
-    //   if (platformResponse.message['results'].length == 0) {
-    //     Navigator.of(context).pushNamed(AppRoute.create_platform_guide);
-    //     return;
-    //   } else {
-    //     var platformJson = platformResponse.message['results'][0];
-    //     platformClient = getPlatformClient(platformJson);
-    //     postListController.setStorePlatform(platformClient!);
-    //     editorController.setStorePlatform(platformClient!);
-    //   }
-    // } else {
-    //   EasyLoading.showError(platformResponse.errorMessage);
-    // }
     loading = false;
     setState(() {});
   }
