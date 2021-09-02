@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:korat/api/base_model/post.dart';
 import 'package:korat/models/platform_client.dart';
+import 'package:korat/models/post_item.dart';
 
 class EditorWidget extends StatefulWidget {
   final EditorController editorController;
@@ -25,7 +25,7 @@ class _EditorWidgetState extends State<EditorWidget> {
       widget.editorController.sendTextToListener(textEditingController.text);
     });
     widget.editorController.addVoidListner(() {
-      textEditingController.text = widget.editorController.getPost().value;
+      textEditingController.text = widget.editorController.getPostItem().value;
       setState(() {
         showWelcomePage = widget.editorController.getShowWelcomePage();
       });
@@ -62,7 +62,9 @@ class _EditorWidgetState extends State<EditorWidget> {
                           var result = await widget.editorController
                               .getPlatform()
                               .putObject(
-                                widget.editorController.getPost().fileName,
+                                widget.editorController
+                                    .getPostItem()
+                                    .fileFullNamePath,
                                 textEditingController.text,
                               );
                           if (result.isSuccess) {
@@ -173,7 +175,7 @@ class _EditorWidgetState extends State<EditorWidget> {
 class EditorController {
   StringCallback? _stringCallback;
   VoidCallback? _voidCallback;
-  Post? _post;
+  PostItem? _postItem;
   bool _showWelcomePage = true;
   PlatformClient? _platform;
 
@@ -195,9 +197,9 @@ class EditorController {
 
   void reset() {}
 
-  void setPost(Post? post) {
-    this._post = post;
-    if (post == null) {
+  void setPostItem(PostItem? postItem) {
+    this._postItem = postItem;
+    if (postItem == null) {
       this._showWelcomePage = true;
     } else {
       this._showWelcomePage = false;
@@ -207,11 +209,11 @@ class EditorController {
     }
   }
 
-  Post getPost() {
-    if (_post == null) {
-      return Post('', '', '');
+  PostItem getPostItem() {
+    if (this._postItem == null) {
+      return PostItem('');
     }
-    return this._post!;
+    return this._postItem!;
   }
 
   bool getShowWelcomePage() {

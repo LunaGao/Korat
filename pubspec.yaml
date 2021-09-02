@@ -35,6 +35,8 @@ dependencies:
   xml: ^5.1.2
   flutter_markdown: ^0.6.4
   adaptive_dialog: ^1.1.0
+  json_serializable: ^4.1.0
+  build_runner: 
 
 dev_dependencies:
   flutter_test:

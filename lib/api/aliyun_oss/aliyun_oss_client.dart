@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:korat/api/aliyun_oss/utils.dart';
-import 'package:korat/api/base_model/post.dart';
 import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
-import 'package:xml/xml.dart';
+import 'package:korat/models/post.dart';
+import 'package:korat/models/post_config.dart';
+import 'package:korat/models/post_item.dart';
 
 class AliyunOSSClient extends PlatformClient {
   final PlatformModel platformModel;
@@ -15,34 +18,67 @@ class AliyunOSSClient extends PlatformClient {
   }
 
   @override
-  Future<ResponseModel<List<Post>>> listObjects() async {
-    var options = _getOptions('GET');
+  Future<ResponseModel<PostConfig>> getPostConfig() async {
+    String fileFullPathName = "korat/post/post.json";
+    var options = _getOptions(
+      'GET',
+      file: fileFullPathName,
+      contentType: "application/json;charset=utf-8",
+    );
     try {
       var response = await Dio().get(
-        "${this.baseUrl}?list-type=2&prefix=korat/",
+        "${this.baseUrl}$fileFullPathName",
         options: options,
       );
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ResponseModel<List<Post>>(
+        return ResponseModel<PostConfig>(
           isSuccess: true,
-          message: _getPostList(response.data),
+          message: PostConfig.fromJson(jsonDecode(response.data as String)),
         );
       } else {
-        return ResponseModel<List<Post>>(
+        return ResponseModel<PostConfig>(
           isSuccess: false,
           errorMessage: "",
         );
       }
     } on DioError catch (e) {
-      return ResponseModel<List<Post>>(
+      return ResponseModel<PostConfig>(
         isSuccess: false,
         errorMessage: e.response!.data,
       );
     } catch (e) {
-      return ResponseModel<List<Post>>(
+      return ResponseModel<PostConfig>(
         isSuccess: false,
         errorMessage: e.toString(),
       );
+    }
+  }
+
+  @override
+  Future<ResponseModel<String>> putPostConfig(String value) async {
+    String fileFullPathName = "korat/post/post.json";
+    var options = _getOptions(
+      'PUT',
+      file: fileFullPathName,
+      contentType: "text/plain;charset=utf-8",
+    );
+    try {
+      var response = await Dio().put(
+        "${this.baseUrl}$fileFullPathName",
+        options: options,
+        data: value,
+      );
+      if (200 <= response.statusCode! && response.statusCode! < 300) {
+        return ResponseModel<String>(isSuccess: true, message: response.data);
+      } else {
+        return ResponseModel<String>(isSuccess: false, errorMessage: "");
+      }
+    } on DioError catch (e) {
+      return ResponseModel<String>(
+          isSuccess: false, errorMessage: e.response!.data);
+    } catch (e) {
+      return ResponseModel<String>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 
@@ -75,45 +111,45 @@ class AliyunOSSClient extends PlatformClient {
   }
 
   @override
-  Future<ResponseModel<Post>> getObject(Post post) async {
+  Future<ResponseModel<PostItem>> getPostObject(Post post) async {
     var options = _getOptions(
       'GET',
-      file: post.fileName,
+      file: post.fileFullNamePath,
       contentType: "text/plain;charset=utf-8",
     );
     try {
       var response = await Dio().get(
-        "${this.baseUrl}${post.fileName}",
+        "${this.baseUrl}${post.fileFullNamePath}",
         options: options,
       );
       if (200 <= response.statusCode! && response.statusCode! < 300) {
-        Post returnPost = Post(
-          post.fileName,
-          post.displayFileName,
-          post.lastModified,
+        PostItem returnPostItem = PostItem(
+          post.fileFullNamePath,
           value: (response.data as String).trimRight(),
         );
-        return ResponseModel<Post>(isSuccess: true, message: returnPost);
+        return ResponseModel<PostItem>(
+            isSuccess: true, message: returnPostItem);
       } else {
-        return ResponseModel<Post>(isSuccess: false, errorMessage: "");
+        return ResponseModel<PostItem>(isSuccess: false, errorMessage: "");
       }
     } on DioError catch (e) {
-      return ResponseModel<Post>(
+      return ResponseModel<PostItem>(
           isSuccess: false, errorMessage: e.response!.data);
     } catch (e) {
-      return ResponseModel<Post>(isSuccess: false, errorMessage: e.toString());
+      return ResponseModel<PostItem>(
+          isSuccess: false, errorMessage: e.toString());
     }
   }
 
   @override
-  Future<ResponseModel<String>> deleteObject(Post post) async {
+  Future<ResponseModel<String>> deleteObject(String fileFullNamePath) async {
     var options = _getOptions(
       'DELETE',
-      file: post.fileName,
+      file: fileFullNamePath,
     );
     try {
       var response = await Dio().delete(
-        "${this.baseUrl}${post.fileName}",
+        "${this.baseUrl}$fileFullNamePath",
         options: options,
       );
       if (200 <= response.statusCode! && response.statusCode! < 300) {
@@ -163,29 +199,5 @@ class AliyunOSSClient extends PlatformClient {
     return Options(
       headers: headers,
     );
-  }
-
-  List<Post> _getPostList(String xmlData) {
-    List<Post> returnValue = [];
-    var document = XmlDocument.parse(xmlData);
-    var keyCount = document.findAllElements('KeyCount').first;
-    var keyCountText = keyCount.text;
-    int keyCountInt = int.parse(keyCountText);
-    if (keyCountInt > 0) {
-      var contents = document.findAllElements('Contents');
-      for (var content in contents) {
-        var fileName = content.getElement('Key')!.text;
-        var displayFileName = fileName.substring(6, fileName.length - 3);
-        var lastModified = content.getElement('LastModified')!.text;
-        returnValue.add(
-          Post(
-            fileName,
-            displayFileName,
-            lastModified,
-          ),
-        );
-      }
-    }
-    return returnValue;
   }
 }

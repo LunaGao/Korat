@@ -1,15 +1,19 @@
 import 'package:korat/api/aliyun_oss/aliyun_oss_client.dart';
-import 'package:korat/api/base_model/post.dart';
+import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/config/platform_config.dart';
 import 'package:korat/models/platform.dart';
+import 'package:korat/models/post.dart';
+import 'package:korat/models/post_config.dart';
+import 'package:korat/models/post_item.dart';
 
 abstract class PlatformClient {
   setPlatformModel(PlatformModel platformModel);
   PlatformModel getPlatformModel();
-  listObjects();
   putObject(String fileNamePath, String value);
-  getObject(Post post);
-  deleteObject(Post post);
+  Future<ResponseModel<PostConfig>> getPostConfig();
+  putPostConfig(String value);
+  Future<ResponseModel<PostItem>> getPostObject(Post postItem);
+  deleteObject(String fileFullNamePath);
 }
 
 PlatformClient getPlatformClient(PlatformModel platformModel) {

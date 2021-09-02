@@ -216,7 +216,6 @@ class _PlatformGroupListState extends State<PlatformGroupList> {
             getData();
           }
         });
-        ;
       },
       title: Text(
         platformGroups[index - 1].name,

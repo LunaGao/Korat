@@ -34,12 +34,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
     editorController.addListener((text) {
       previewController.setDisplayValue(text);
     });
-    postListController.addListener((post) {
+    postListController.addListener((postItem) {
       editorController.reset();
-      editorController.setPost(post);
+      editorController.setPostItem(postItem);
       previewController.setDisplayValue(
-        post == null ? '' : post.value,
-        showWelcomePage: post == null,
+        postItem == null ? '' : postItem.value,
+        showWelcomePage: postItem == null,
       );
     });
     appbarController.addUserListener((user) {

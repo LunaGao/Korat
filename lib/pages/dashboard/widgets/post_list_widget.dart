@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:korat/api/base_model/post.dart';
 import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/models/platform_client.dart';
+import 'package:korat/models/post.dart';
+import 'package:korat/models/post_config.dart';
+import 'package:korat/models/post_item.dart';
 
 class PostListWidget extends StatefulWidget {
   final PostListController postListController;
@@ -19,7 +23,7 @@ class PostListWidget extends StatefulWidget {
 class _PostListWidgetState extends State<PostListWidget> {
   bool loading = true;
   bool success = true;
-  List<Post> posts = [];
+  PostConfig postsConfig = PostConfig([]);
   int selectedPostIndex = -1;
   String selectedPostFileNamePath = '';
 
@@ -34,22 +38,29 @@ class _PostListWidgetState extends State<PostListWidget> {
   void getData() async {
     loading = true;
     setState(() {});
-    var result = await widget.postListController.getPlatform().listObjects();
+    var result = await widget.postListController.getPlatform().getPostConfig();
     if (result.isSuccess) {
-      posts = result.message!;
-      posts.asMap().forEach((index, value) {
-        if (value.fileName == this.selectedPostFileNamePath) {
-          this.selectedPostIndex = index;
-          widget.postListController.onClickPostTitle(value);
-        }
-      });
-      this.selectedPostFileNamePath = '';
-      success = true;
+      postsConfig.posts = result.message!.posts;
     } else {
-      success = false;
-      print(result.errorMessage);
-      EasyLoading.showError(result.errorMessage);
+      print("error: " + result.errorMessage);
     }
+
+    // var result = await widget.postListController.getPlatform().listObjects();
+    // if (result.isSuccess) {
+    //   posts = result.message!;
+    //   posts.asMap().forEach((index, value) {
+    //     if (value.fileName == this.selectedPostFileNamePath) {
+    //       this.selectedPostIndex = index;
+    //       widget.postListController.onClickPostTitle(value);
+    //     }
+    //   });
+    //   this.selectedPostFileNamePath = '';
+    //   success = true;
+    // } else {
+    //   success = false;
+    //   print(result.errorMessage);
+    //   EasyLoading.showError(result.errorMessage);
+    // }
     loading = false;
     setState(() {});
   }
@@ -63,13 +74,26 @@ class _PostListWidgetState extends State<PostListWidget> {
       ],
     ).then((value) async {
       if (value != null && value.length != 0) {
-        String fileNamePath = 'korat/${value[0]}.md';
-        this.selectedPostFileNamePath = fileNamePath;
+        String displayName = value[0];
+        String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+        String fileFullNamePath = 'korat/post/data/$fileName.md';
+        this.selectedPostFileNamePath = fileFullNamePath;
         var result = await widget.postListController.getPlatform().putObject(
-              fileNamePath,
+              fileFullNamePath,
               ' ',
             );
         if (result.isSuccess) {
+          var post = Post(
+            fileFullNamePath,
+            displayName,
+            DateTime.now().toString(),
+            [],
+            "",
+          );
+          postsConfig.posts.add(post);
+          widget.postListController
+              .getPlatform()
+              .putPostConfig(json.encode(postsConfig));
           getData();
         } else {
           this.selectedPostFileNamePath = '';
@@ -112,8 +136,13 @@ class _PostListWidgetState extends State<PostListWidget> {
       context: context,
     ).then((value) async {
       if (value == OkCancelResult.ok) {
-        var result =
-            await widget.postListController.getPlatform().deleteObject(post);
+        postsConfig.posts.remove(post);
+        await widget.postListController
+            .getPlatform()
+            .putPostConfig(json.encode(postsConfig));
+        var result = await widget.postListController
+            .getPlatform()
+            .deleteObject(post.fileFullNamePath);
         if (result.isSuccess) {
           selectedPostIndex = -1;
           getData();
@@ -125,6 +154,22 @@ class _PostListWidgetState extends State<PostListWidget> {
         }
       }
     });
+  }
+
+  onClickPostItem(int index) async {
+    ResponseModel<PostItem> responseModel = await widget.postListController
+        .getPlatform()
+        .getPostObject(postsConfig.posts[index]);
+    if (responseModel.isSuccess) {
+      selectedPostIndex = index;
+      widget.postListController.onClickPostTitle(responseModel.message);
+    } else {
+      selectedPostIndex = -1;
+      widget.postListController.onClickPostTitle(null);
+      EasyLoading.showError("载入错误");
+      getData();
+    }
+    setState(() {});
   }
 
   @override
@@ -153,7 +198,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: posts.length,
+                      itemCount: postsConfig.posts.length,
                       itemBuilder: (BuildContext context, int index) {
                         return postItemWidget(index);
                       },
@@ -168,23 +213,9 @@ class _PostListWidgetState extends State<PostListWidget> {
   Widget postItemWidget(int index) {
     return ListTile(
       selected: selectedPostIndex == index,
-      onTap: () async {
-        ResponseModel<Post> responseModel = await widget.postListController
-            .getPlatform()
-            .getObject(posts[index]);
-        if (responseModel.isSuccess) {
-          selectedPostIndex = index;
-          widget.postListController.onClickPostTitle(responseModel.message);
-        } else {
-          selectedPostIndex = -1;
-          widget.postListController.onClickPostTitle(null);
-          EasyLoading.showError("载入错误");
-          getData();
-        }
-        setState(() {});
-      },
+      onTap: () => onClickPostItem(index),
       title: Text(
-        posts[index].displayFileName,
+        postsConfig.posts[index].displayFileName,
         style: TextStyle(
           fontWeight:
               selectedPostIndex == index ? FontWeight.w500 : FontWeight.w400,
@@ -194,7 +225,7 @@ class _PostListWidgetState extends State<PostListWidget> {
         child: Icon(Icons.more_vert),
         onSelected: (value) {
           if (value == 'delete') {
-            onDeletePost(posts[index]);
+            onDeletePost(postsConfig.posts[index]);
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -233,9 +264,9 @@ class PostListController {
     return this._platform!;
   }
 
-  void onClickPostTitle(Post? post) {
+  void onClickPostTitle(PostItem? postItem) {
     if (this._postCallback != null) {
-      this._postCallback!(post);
+      this._postCallback!(postItem);
     }
   }
 
@@ -251,4 +282,4 @@ class PostListController {
   }
 }
 
-typedef PostCallback = void Function(Post? post);
+typedef PostCallback = void Function(PostItem? post);
