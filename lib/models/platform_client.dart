@@ -12,7 +12,7 @@ abstract class PlatformClient {
   putObject(String fileNamePath, String value);
   Future<ResponseModel<PostConfig>> getPostConfig();
   putPostConfig(String value);
-  Future<ResponseModel<PostItem>> getPostObject(Post postItem);
+  Future<ResponseModel<PostItem>> getPostObject(Post post);
   deleteObject(String fileFullNamePath);
 }
 

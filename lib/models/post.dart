@@ -4,6 +4,7 @@ part 'post.g.dart';
 
 @JsonSerializable()
 class Post {
+  String fileName;
   String fileFullNamePath;
   String displayFileName;
   String lastModified;
@@ -11,6 +12,7 @@ class Post {
   String category;
 
   Post(
+    this.fileName,
     this.fileFullNamePath,
     this.displayFileName,
     this.lastModified,

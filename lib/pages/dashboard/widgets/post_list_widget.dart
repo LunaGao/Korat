@@ -4,7 +4,9 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/base_model/response_model.dart';
+import 'package:korat/logic/publish_client.dart';
 import 'package:korat/models/platform_client.dart';
+import 'package:korat/models/platform_group.dart';
 import 'package:korat/models/post.dart';
 import 'package:korat/models/post_config.dart';
 import 'package:korat/models/post_item.dart';
@@ -25,7 +27,6 @@ class _PostListWidgetState extends State<PostListWidget> {
   bool success = true;
   PostConfig postsConfig = PostConfig([]);
   int selectedPostIndex = -1;
-  String selectedPostFileNamePath = '';
 
   @override
   void initState() {
@@ -44,23 +45,6 @@ class _PostListWidgetState extends State<PostListWidget> {
     } else {
       print("error: " + result.errorMessage);
     }
-
-    // var result = await widget.postListController.getPlatform().listObjects();
-    // if (result.isSuccess) {
-    //   posts = result.message!;
-    //   posts.asMap().forEach((index, value) {
-    //     if (value.fileName == this.selectedPostFileNamePath) {
-    //       this.selectedPostIndex = index;
-    //       widget.postListController.onClickPostTitle(value);
-    //     }
-    //   });
-    //   this.selectedPostFileNamePath = '';
-    //   success = true;
-    // } else {
-    //   success = false;
-    //   print(result.errorMessage);
-    //   EasyLoading.showError(result.errorMessage);
-    // }
     loading = false;
     setState(() {});
   }
@@ -77,13 +61,13 @@ class _PostListWidgetState extends State<PostListWidget> {
         String displayName = value[0];
         String fileName = DateTime.now().millisecondsSinceEpoch.toString();
         String fileFullNamePath = 'korat/post/data/$fileName.md';
-        this.selectedPostFileNamePath = fileFullNamePath;
         var result = await widget.postListController.getPlatform().putObject(
               fileFullNamePath,
               ' ',
             );
         if (result.isSuccess) {
           var post = Post(
+            fileName,
             fileFullNamePath,
             displayName,
             DateTime.now().toString(),
@@ -96,7 +80,6 @@ class _PostListWidgetState extends State<PostListWidget> {
               .putPostConfig(json.encode(postsConfig));
           getData();
         } else {
-          this.selectedPostFileNamePath = '';
           print(result.errorMessage);
           EasyLoading.showError(result.errorMessage);
         }
@@ -115,17 +98,10 @@ class _PostListWidgetState extends State<PostListWidget> {
           status: "生成中，请勿关闭网页。",
           maskType: EasyLoadingMaskType.black,
         );
-        // var result =
-        //     await widget.postListController.getPlatform().deleteObject(post);
-        // if (result.isSuccess) {
-        //   selectedPostIndex = -1;
-        //   getData();
-        //   widget.postListController.onClickPostTitle(null);
-        //   EasyLoading.showSuccess("删除成功");
-        // } else {
-        //   print(result.errorMessage);
-        //   EasyLoading.showError(result.errorMessage);
-        // }
+        await PublishClient()
+            .publish(widget.postListController.getCurrentPlatformGroup());
+        await EasyLoading.dismiss();
+        EasyLoading.showSuccess("发布成功");
       }
     });
   }
@@ -249,9 +225,18 @@ class _PostListWidgetState extends State<PostListWidget> {
 }
 
 class PostListController {
+  PlatformGroup? _platformGroup;
   PlatformClient? _platform;
   PostCallback? _postCallback;
   VoidCallback? _postListListener;
+
+  void setCurrentPlatformGroup(PlatformGroup platformGroup) {
+    this._platformGroup = platformGroup;
+  }
+
+  PlatformGroup getCurrentPlatformGroup() {
+    return this._platformGroup!;
+  }
 
   void setStorePlatform(PlatformClient oss) {
     this._platform = oss;

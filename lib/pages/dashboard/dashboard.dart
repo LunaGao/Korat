@@ -73,6 +73,8 @@ class _DashBoardPageState extends State<DashBoardPage> {
         return;
       } else {
         appbarController.setPlatformGroups(platformGroupsResponse.message!);
+        postListController
+            .setCurrentPlatformGroup(platformGroupsResponse.message![0]);
         var dataPlatform = platformGroupsResponse.message![0].dataPlatform!;
         platformClient = getPlatformClient(dataPlatform);
         postListController.setStorePlatform(platformClient!);

@@ -8,6 +8,7 @@ part of 'post.dart';
 
 Post _$PostFromJson(Map<String, dynamic> json) {
   return Post(
+    json['fileName'] as String,
     json['fileFullNamePath'] as String,
     json['displayFileName'] as String,
     json['lastModified'] as String,
@@ -17,6 +18,7 @@ Post _$PostFromJson(Map<String, dynamic> json) {
 }
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
+      'fileName': instance.fileName,
       'fileFullNamePath': instance.fileFullNamePath,
       'displayFileName': instance.displayFileName,
       'lastModified': instance.lastModified,
