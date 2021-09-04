@@ -2,6 +2,7 @@ import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/platform_group.dart';
 import 'package:korat/models/post.dart';
+import 'package:markdown/markdown.dart';
 import 'package:korat/models/post_item.dart';
 
 class PublishClient {
@@ -33,9 +34,10 @@ class PublishClient {
         ResponseModel<PostItem> postItemResponseModel =
             await dataPlatformClient.getPostObject(post);
         if (postItemResponseModel.isSuccess) {
+          var value = postItemResponseModel.message!.value.trim();
           await publishPlatformClient.putObject(
             'post/${post.fileName}.html',
-            postItemResponseModel.message!.value,
+            markdownToHtml(value),
             contentType: "text/html;charset=utf-8",
           );
         } else {
