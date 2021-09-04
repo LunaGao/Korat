@@ -33,8 +33,11 @@ class PublishClient {
         ResponseModel<PostItem> postItemResponseModel =
             await dataPlatformClient.getPostObject(post);
         if (postItemResponseModel.isSuccess) {
-          await publishPlatformClient.putObject('post/${post.fileName}.html',
-              postItemResponseModel.message!.value);
+          await publishPlatformClient.putObject(
+            'post/${post.fileName}.html',
+            postItemResponseModel.message!.value,
+            contentType: "text/html;charset=utf-8",
+          );
         } else {
           print("error: " + result.errorMessage);
           return;

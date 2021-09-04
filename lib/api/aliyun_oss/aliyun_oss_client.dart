@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:korat/api/aliyun_oss/utils.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
@@ -84,13 +86,18 @@ class AliyunOSSClient extends PlatformClient {
 
   @override
   Future<ResponseModel<String>> putObject(
-      String fileNamePath, String value) async {
+    String fileNamePath,
+    String value, {
+    String contentType = "text/plain;charset=utf-8",
+  }) async {
     var options = _getOptions(
       'PUT',
       file: fileNamePath,
-      contentType: "text/plain;charset=utf-8",
+      contentType: contentType,
     );
     try {
+      print("${this.baseUrl}$fileNamePath");
+      print(fileNamePath);
       var response = await Dio().put(
         "${this.baseUrl}$fileNamePath",
         options: options,
@@ -199,5 +206,30 @@ class AliyunOSSClient extends PlatformClient {
     return Options(
       headers: headers,
     );
+  }
+
+  String getAuthorization(
+    String keyId,
+    String keySecret,
+    String httpMethod,
+    String date, {
+    String path = '',
+    String contentType = '',
+  }) {
+    path = "/${platformModel.bucket}/" + path;
+    String signature =
+        "$httpMethod\n\n$contentType\n$date\nx-oss-date:$date\n$path";
+    var hmac = new Hmac(sha1, utf8.encode(keySecret));
+    var digest = hmac.convert(utf8.encode(signature));
+    var returnSignature = base64Encode(digest.bytes);
+    return "OSS " + keyId + ":" + returnSignature;
+  }
+
+  String httpDateNow() {
+    final dt = new DateTime.now();
+    initializeDateFormatting();
+    final formatter = new DateFormat('EEE, dd MMM yyyy HH:mm:ss', 'en_ISO');
+    final dts = formatter.format(dt.toUtc());
+    return "$dts GMT";
   }
 }

@@ -9,7 +9,11 @@ import 'package:korat/models/post_item.dart';
 abstract class PlatformClient {
   setPlatformModel(PlatformModel platformModel);
   PlatformModel getPlatformModel();
-  putObject(String fileNamePath, String value);
+  Future<ResponseModel<String>> putObject(
+    String fileNamePath,
+    String value, {
+    String contentType,
+  });
   Future<ResponseModel<PostConfig>> getPostConfig();
   putPostConfig(String value);
   Future<ResponseModel<PostItem>> getPostObject(Post post);
