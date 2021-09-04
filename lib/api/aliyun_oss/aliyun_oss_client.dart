@@ -96,8 +96,6 @@ class AliyunOSSClient extends PlatformClient {
       contentType: contentType,
     );
     try {
-      print("${this.baseUrl}$fileNamePath");
-      print(fileNamePath);
       var response = await Dio().put(
         "${this.baseUrl}$fileNamePath",
         options: options,

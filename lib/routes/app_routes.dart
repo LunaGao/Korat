@@ -44,4 +44,5 @@ class AppRoute {
   static const String platform_group_editor = '/platform_group_editor';
   static const String platform_editor = '/platform_editor';
   static const String platform_group_list = '/platform_groups';
+  static const String platform_group_settings = '/platform_group_settings';
 }

@@ -10,6 +10,8 @@ import 'package:korat/models/platform_group.dart';
 import 'package:korat/models/post.dart';
 import 'package:korat/models/post_config.dart';
 import 'package:korat/models/post_item.dart';
+import 'package:korat/pages/settings/platform_group_settings.dart';
+import 'package:korat/routes/app_routes.dart';
 
 class PostListWidget extends StatefulWidget {
   final PostListController postListController;
@@ -87,6 +89,15 @@ class _PostListWidgetState extends State<PostListWidget> {
     });
   }
 
+  onClickSettingsButton() {
+    Navigator.of(context).pushNamed(
+      AppRoute.platform_group_settings,
+      arguments: PlatformGroupSettingsPageArguments(
+        widget.postListController.getCurrentPlatformGroup(),
+      ),
+    );
+  }
+
   onPublishPost() {
     showOkCancelAlertDialog(
       title: "是否发布内容到发布平台？",
@@ -160,17 +171,39 @@ class _PostListWidgetState extends State<PostListWidget> {
               )
             : Column(
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      onPublishPost();
-                    },
-                    child: Text("发布"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      onCreatePost();
-                    },
-                    child: Text("创建帖子"),
+                  Row(
+                    children: [
+                      IconButton(
+                        tooltip: "创建帖子",
+                        onPressed: () {
+                          onCreatePost();
+                        },
+                        icon: Icon(
+                          Icons.create_outlined,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      Expanded(child: SizedBox()),
+                      IconButton(
+                        tooltip: "设置",
+                        onPressed: () {
+                          onClickSettingsButton();
+                        },
+                        icon: Icon(
+                          Icons.settings_outlined,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: "发布",
+                        onPressed: () {
+                          onPublishPost();
+                        },
+                        icon: Icon(
+                          Icons.publish_outlined,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
                   ),
                   Expanded(
                     child: ListView.builder(

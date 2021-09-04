@@ -7,6 +7,7 @@ import 'package:korat/pages/dashboard/dashboard.dart';
 import 'package:korat/pages/platform/platform_group/platform_group_list.dart';
 import 'package:korat/pages/public/error.dart';
 import 'package:korat/pages/public/home.dart';
+import 'package:korat/pages/settings/platform_group_settings.dart';
 import 'package:korat/pages/signin/signin.dart';
 import 'package:korat/pages/signup/signup.dart';
 import 'app_routes.dart';
@@ -21,6 +22,8 @@ class WebRoute {
       AppRoute.platform_group_editor: (context) => PlatformGroupEditorPage(),
       AppRoute.platform_group_list: (context) => PlatformGroupList(),
       AppRoute.platform_editor: (context) => PlatformEditor(),
+      AppRoute.platform_group_settings: (context) =>
+          PlatformGroupSettingsPage(),
     };
   }
 
