@@ -66,10 +66,7 @@ Widget uploadBox(
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        OutlinedButton(
-          onPressed: () => callback(),
-          child: Text(title),
-        ),
+        OutlinedButton(onPressed: () => callback(), child: Text(title)),
         SizedBox(
           width: 10,
         ),
@@ -87,4 +84,32 @@ Uint8List string2Uint8list(String s) {
   var bytes = data.buffer.asUint8List();
   bytes.setRange(4, encodedLength + 4, encodedString);
   return bytes;
+}
+
+getAndDisplayInputItem(
+  String key,
+  TextEditingController textEditingController,
+  Map<String, dynamic> items,
+) {
+  if (items.containsKey(key)) {
+    var item = items[key];
+    textEditingController.text = item["value"];
+  } else {
+    textEditingController.text = '';
+  }
+}
+
+setItem(
+  String key,
+  TextEditingController? textEditingController,
+  Map<String, dynamic> items, {
+  String value = '',
+}) {
+  var item = Map<String, dynamic>();
+  if (textEditingController != null) {
+    item.putIfAbsent("value", () => textEditingController.text);
+  } else {
+    item.putIfAbsent("value", () => value);
+  }
+  items.putIfAbsent(key, () => item);
 }

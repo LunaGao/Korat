@@ -37,7 +37,8 @@ class _PlatformGroupSettingsPageState extends State<PlatformGroupSettingsPage> {
         return BlogSettingsWidget(
             getPlatformClient(platformGroup!.dataPlatform!));
       case 1:
-        return UserSettingsWidget();
+        return UserSettingsWidget(
+            getPlatformClient(platformGroup!.dataPlatform!));
       case 2:
         return StyleSettingsWidget();
     }

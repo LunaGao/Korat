@@ -5,4 +5,8 @@ class SettingsConfig {
   static final String blogRecordKey = 'blogRecordKey';
   static final String blogCopyrightKey = 'blogCopyrightKey';
   static final String blogLogoKey = 'blogLogoKey';
+
+  static final String userNameKey = 'userNameKey';
+  static final String userDetailKey = 'userDetailKey';
+  static final String userAvatarKey = 'userAvatarKey';
 }

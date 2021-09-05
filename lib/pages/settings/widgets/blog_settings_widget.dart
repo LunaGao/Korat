@@ -44,36 +44,17 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
     );
     if (response.isSuccess) {
       data = response.message!;
-      getAndDisplayItem(
-        SettingsConfig.blogTitleKey,
-        blogTitleEditingController,
-        data,
-      );
-      getAndDisplayItem(
-        SettingsConfig.blogDomainKey,
-        domainEditingController,
-        data,
-      );
-      getAndDisplayItem(
-        SettingsConfig.blogDetailKey,
-        blogDetailEditingController,
-        data,
-      );
-      getAndDisplayItem(
-        SettingsConfig.blogRecordKey,
-        recordEditingController,
-        data,
-      );
-      getAndDisplayItem(
-        SettingsConfig.blogCopyrightKey,
-        copyrightEditingController,
-        data,
-      );
-      getAndDisplayItem(
-        SettingsConfig.blogLogoKey,
-        null,
-        data,
-      );
+      getAndDisplayInputItem(
+          SettingsConfig.blogTitleKey, blogTitleEditingController, data);
+      getAndDisplayInputItem(
+          SettingsConfig.blogDomainKey, domainEditingController, data);
+      getAndDisplayInputItem(
+          SettingsConfig.blogDetailKey, blogDetailEditingController, data);
+      getAndDisplayInputItem(
+          SettingsConfig.blogRecordKey, recordEditingController, data);
+      getAndDisplayInputItem(
+          SettingsConfig.blogCopyrightKey, copyrightEditingController, data);
+      getAndDisplayBlogIconItem(SettingsConfig.blogLogoKey, data);
       setState(() {});
     } else {
       print(response.errorMessage);
@@ -111,50 +92,30 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
     });
   }
 
-  setItem(
+  getAndDisplayBlogIconItem(
     String key,
-    TextEditingController? textEditingController,
-    Map<String, dynamic> items, {
-    String value = '',
-  }) {
-    var item = Map<String, dynamic>();
-    if (textEditingController != null) {
-      item.putIfAbsent("value", () => textEditingController.text);
-    } else {
-      item.putIfAbsent("value", () => value);
-    }
-    items.putIfAbsent(key, () => item);
-  }
-
-  getAndDisplayItem(
-    String key,
-    TextEditingController? textEditingController,
     Map<String, dynamic> items,
   ) {
     var item = items[key];
-    if (textEditingController == null) {
-      var path = item["value"] as String;
-      widget.platformClient
-          .getObject<String>(
-        path,
-        contentType: ContentTypeConfig.ico,
-      )
-          .then((value) {
-        if (value.isSuccess) {
-          blogIconFileBytes = string2Uint8list(value.message!);
-          blogLogoWidget = Image.memory(
-            blogIconFileBytes!,
-            width: 20,
-            height: 20,
-          );
-          setState(() {});
-        } else {
-          print(value.errorMessage);
-        }
-      });
-    } else {
-      textEditingController.text = item["value"];
-    }
+    var path = item["value"] as String;
+    widget.platformClient
+        .getObject<String>(
+      path,
+      contentType: ContentTypeConfig.ico,
+    )
+        .then((value) {
+      if (value.isSuccess) {
+        blogIconFileBytes = string2Uint8list(value.message!);
+        blogLogoWidget = Image.memory(
+          blogIconFileBytes!,
+          width: 20,
+          height: 20,
+        );
+        setState(() {});
+      } else {
+        print(value.errorMessage);
+      }
+    });
   }
 
   onUploadBlogLogo() async {
