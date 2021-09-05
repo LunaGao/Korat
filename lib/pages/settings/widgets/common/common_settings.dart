@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
-List<Widget> group(String title, List<Widget> content) {
+List<Widget> group(
+  String title,
+  List<Widget> content,
+) {
   return [
     SizedBox(
       height: 10,
@@ -19,7 +25,10 @@ List<Widget> group(String title, List<Widget> content) {
   ];
 }
 
-Widget inputBox(String title, TextEditingController textEditingController) {
+Widget inputBox(
+  String title,
+  TextEditingController textEditingController,
+) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
@@ -36,10 +45,46 @@ Widget inputBox(String title, TextEditingController textEditingController) {
 }
 
 Widget saveButton(VoidCallback callback) {
-  return TextButton(
-    child: Text("保存"),
-    onPressed: () {
-      callback();
-    },
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: TextButton(
+      child: Text("保存"),
+      onPressed: () {
+        callback();
+      },
+    ),
   );
+}
+
+Widget uploadBox(
+  String title,
+  VoidCallback callback,
+  Widget? displayWidget,
+) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        OutlinedButton(
+          onPressed: () => callback(),
+          child: Text(title),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        displayWidget == null ? Text("未设置") : displayWidget,
+      ],
+    ),
+  );
+}
+
+Uint8List string2Uint8list(String s) {
+  var encodedString = utf8.encode(s);
+  var encodedLength = encodedString.length;
+  var data = ByteData(encodedLength + 4);
+  data.setUint32(0, encodedLength, Endian.big);
+  var bytes = data.buffer.asUint8List();
+  bytes.setRange(4, encodedLength + 4, encodedString);
+  return bytes;
 }

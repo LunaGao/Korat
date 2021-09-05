@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/platform_group.dart';
 import 'package:korat/pages/dashboard/widgets/utils_widget.dart';
 import 'package:korat/pages/settings/widgets/blog_settings_widget.dart';
@@ -33,7 +34,8 @@ class _PlatformGroupSettingsPageState extends State<PlatformGroupSettingsPage> {
   Widget settingsContentWidget(int index) {
     switch (index) {
       case 0:
-        return BlogSettingsWidget();
+        return BlogSettingsWidget(
+            getPlatformClient(platformGroup!.dataPlatform!));
       case 1:
         return UserSettingsWidget();
       case 2:

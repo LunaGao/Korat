@@ -36,7 +36,7 @@ class PublishClient {
         if (postItemResponseModel.isSuccess) {
           var value = postItemResponseModel.message!.value.trim();
           await publishPlatformClient.putObject(
-            'post/${post.fileName}.html',
+            'data/${post.fileName}.html',
             markdownToHtml(value),
             contentType: "text/html;charset=utf-8",
           );

@@ -87,7 +87,7 @@ class AliyunOSSClient extends PlatformClient {
   @override
   Future<ResponseModel<String>> putObject(
     String fileNamePath,
-    String value, {
+    dynamic value, {
     String contentType = "text/plain;charset=utf-8",
   }) async {
     var options = _getOptions(
@@ -112,6 +112,36 @@ class AliyunOSSClient extends PlatformClient {
     } catch (e) {
       return ResponseModel<String>(
           isSuccess: false, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<ResponseModel<T>> getObject<T>(
+    String path, {
+    String contentType = "text/plain;charset=utf-8",
+  }) async {
+    var options = _getOptions(
+      'GET',
+      file: path,
+      contentType: contentType,
+    );
+    try {
+      var response = await Dio().get(
+        "${this.baseUrl}$path",
+        options: options,
+      );
+      if (200 <= response.statusCode! && response.statusCode! < 300) {
+        return ResponseModel<T>(
+          isSuccess: true,
+          message: (response.data as T),
+        );
+      } else {
+        return ResponseModel<T>(isSuccess: false, errorMessage: "");
+      }
+    } on DioError catch (e) {
+      return ResponseModel<T>(isSuccess: false, errorMessage: e.response!.data);
+    } catch (e) {
+      return ResponseModel<T>(isSuccess: false, errorMessage: e.toString());
     }
   }
 

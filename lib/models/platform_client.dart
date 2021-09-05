@@ -11,7 +11,11 @@ abstract class PlatformClient {
   PlatformModel getPlatformModel();
   Future<ResponseModel<String>> putObject(
     String fileNamePath,
-    String value, {
+    dynamic value, {
+    String contentType,
+  });
+  Future<ResponseModel<T>> getObject<T>(
+    String fileNamePath, {
     String contentType,
   });
   Future<ResponseModel<PostConfig>> getPostConfig();
