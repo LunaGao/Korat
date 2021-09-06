@@ -39,6 +39,7 @@ dependencies:
   build_runner: 
   markdown: ^4.0.0
   file_picker: ^4.0.1
+  http: ^0.13.3
 
 dev_dependencies:
   flutter_test:

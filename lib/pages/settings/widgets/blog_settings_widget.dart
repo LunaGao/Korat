@@ -62,13 +62,13 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
     }
   }
 
-  save() {
+  save() async {
     var blogIconPath = '';
     if (blogIconFileBytes != null) {
       blogIconPath = ConfigFilePath.imagePathPrefix +
           DateTime.now().millisecondsSinceEpoch.toString() +
           ".ico";
-      widget.platformClient.putObject(
+      await widget.platformClient.putObject(
         blogIconPath,
         blogIconFileBytes!,
         contentType: ContentTypeConfig.ico,

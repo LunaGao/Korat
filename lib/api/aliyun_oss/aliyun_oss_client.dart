@@ -10,6 +10,7 @@ import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post.dart';
 import 'package:korat/models/post_config.dart';
 import 'package:korat/models/post_item.dart';
+import 'package:http/http.dart' as http;
 
 class AliyunOSSClient extends PlatformClient {
   final PlatformModel platformModel;
@@ -87,22 +88,36 @@ class AliyunOSSClient extends PlatformClient {
   @override
   Future<ResponseModel<String>> putObject(
     String fileNamePath,
-    dynamic value, {
+    value, {
     String contentType = "text/plain;charset=utf-8",
   }) async {
     var options = _getOptions(
       'PUT',
+      contentLength: value.length,
       file: fileNamePath,
       contentType: contentType,
     );
+    var date = httpDateNow();
+    var authorization = getAuthorization(
+      this.platformModel.keyId,
+      this.platformModel.keySecret,
+      'PUT',
+      date,
+      contentType: contentType,
+      path: fileNamePath,
+    );
+    Map<String, String> headers = {
+      'x-oss-date': date,
+      'Authorization': authorization,
+      'Connection': 'keep-alive',
+      'Content-Type': contentType,
+      Headers.contentLengthHeader: value.length.toString(),
+    };
     try {
-      var response = await Dio().put(
-        "${this.baseUrl}$fileNamePath",
-        options: options,
-        data: value,
-      );
-      if (200 <= response.statusCode! && response.statusCode! < 300) {
-        return ResponseModel<String>(isSuccess: true, message: response.data);
+      var url = Uri.parse('${this.baseUrl}$fileNamePath');
+      var response = await http.put(url, headers: headers, body: value);
+      if (200 <= response.statusCode && response.statusCode < 300) {
+        return ResponseModel<String>(isSuccess: true, message: response.body);
       } else {
         return ResponseModel<String>(isSuccess: false, errorMessage: "");
       }
@@ -212,6 +227,7 @@ class AliyunOSSClient extends PlatformClient {
 
   Options _getOptions(
     String httpMethod, {
+    int contentLength = 0,
     String file = '',
     String contentType = '',
   }) {
@@ -229,6 +245,7 @@ class AliyunOSSClient extends PlatformClient {
       'Authorization': authorization,
       'Connection': 'keep-alive',
       'Content-Type': contentType,
+      Headers.contentLengthHeader: contentLength,
     };
 
     return Options(

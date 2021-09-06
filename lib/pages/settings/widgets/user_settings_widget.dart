@@ -54,16 +54,16 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
     }
   }
 
-  save() {
+  save() async {
     var userAvatarPath = '';
     if (userAvatarFileBytes != null) {
       userAvatarPath = ConfigFilePath.imagePathPrefix +
           DateTime.now().millisecondsSinceEpoch.toString() +
           ".$userAvatarExtension";
-      widget.platformClient.putObject(
+      await widget.platformClient.putObject(
         userAvatarPath,
         userAvatarFileBytes!,
-        contentType: ContentTypeConfig.ico,
+        contentType: "image/$userAvatarExtension",
       );
     }
     var items = Map<String, dynamic>();
@@ -93,6 +93,7 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
     if (result != null) {
       userAvatarExtension = result.files.first.extension!;
       userAvatarFileBytes = result.files.first.bytes;
+      print(userAvatarFileBytes!.length.toString());
       userAvatarWidget = Image.memory(
         userAvatarFileBytes!,
         width: 60,
