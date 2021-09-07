@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/platforms/model/object_model.dart';
+import 'package:korat/config/content_type_config.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post_item.dart';
 
@@ -62,10 +64,13 @@ class _EditorWidgetState extends State<EditorWidget> {
                           var result = await widget.editorController
                               .getPlatform()
                               .putObject(
-                                widget.editorController
-                                    .getPostItem()
-                                    .fileFullNamePath,
-                                textEditingController.text,
+                                ObjModel(
+                                  widget.editorController
+                                      .getPostItem()
+                                      .fileFullNamePath,
+                                  textEditingController.text,
+                                  ContentTypeConfig.text,
+                                ),
                               );
                           if (result.isSuccess) {
                             EasyLoading.showSuccess("保存成功！");

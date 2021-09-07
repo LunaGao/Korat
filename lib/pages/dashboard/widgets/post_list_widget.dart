@@ -4,6 +4,9 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/base_model/response_model.dart';
+import 'package:korat/api/platforms/model/object_model.dart';
+import 'package:korat/config/config_file_path.dart';
+import 'package:korat/config/content_type_config.dart';
 import 'package:korat/logic/publish_client.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/platform_group.dart';
@@ -41,9 +44,15 @@ class _PostListWidgetState extends State<PostListWidget> {
   void getData() async {
     loading = true;
     setState(() {});
-    var result = await widget.postListController.getPlatform().getPostConfig();
+    var result = await widget.postListController
+        .getPlatform()
+        .getObject<String>(ObjModel(
+          ConfigFilePath.postsConfigPath,
+          null,
+          ContentTypeConfig.json,
+        ));
     if (result.isSuccess) {
-      postsConfig.posts = result.message!.posts;
+      postsConfig = PostConfig.fromJson(jsonDecode(result.message!));
     } else {
       print("error: " + result.errorMessage);
     }
@@ -64,8 +73,11 @@ class _PostListWidgetState extends State<PostListWidget> {
         String fileName = DateTime.now().millisecondsSinceEpoch.toString();
         String fileFullNamePath = 'korat/post/data/$fileName.md';
         var result = await widget.postListController.getPlatform().putObject(
-              fileFullNamePath,
-              ' ',
+              ObjModel(
+                fileFullNamePath,
+                ' ',
+                ContentTypeConfig.text,
+              ),
             );
         if (result.isSuccess) {
           var post = Post(
@@ -77,9 +89,13 @@ class _PostListWidgetState extends State<PostListWidget> {
             "",
           );
           postsConfig.posts.add(post);
-          widget.postListController
-              .getPlatform()
-              .putPostConfig(json.encode(postsConfig));
+          widget.postListController.getPlatform().putObject(
+                ObjModel(
+                  ConfigFilePath.postsConfigPath,
+                  json.encode(postsConfig),
+                  ContentTypeConfig.json,
+                ),
+              );
           getData();
         } else {
           print(result.errorMessage);
@@ -124,12 +140,20 @@ class _PostListWidgetState extends State<PostListWidget> {
     ).then((value) async {
       if (value == OkCancelResult.ok) {
         postsConfig.posts.remove(post);
-        await widget.postListController
-            .getPlatform()
-            .putPostConfig(json.encode(postsConfig));
-        var result = await widget.postListController
-            .getPlatform()
-            .deleteObject(post.fileFullNamePath);
+        await widget.postListController.getPlatform().putObject(
+              ObjModel(
+                ConfigFilePath.postsConfigPath,
+                json.encode(postsConfig),
+                ContentTypeConfig.json,
+              ),
+            );
+        var result = await widget.postListController.getPlatform().deleteObject(
+              ObjModel(
+                post.fileFullNamePath,
+                ' ',
+                ' ',
+              ),
+            );
         if (result.isSuccess) {
           selectedPostIndex = -1;
           getData();
@@ -144,12 +168,21 @@ class _PostListWidgetState extends State<PostListWidget> {
   }
 
   onClickPostItem(int index) async {
-    ResponseModel<PostItem> responseModel = await widget.postListController
-        .getPlatform()
-        .getPostObject(postsConfig.posts[index]);
+    ResponseModel<String> responseModel =
+        await widget.postListController.getPlatform().getObject<String>(
+              ObjModel(
+                postsConfig.posts[index].fileFullNamePath,
+                '',
+                ContentTypeConfig.text,
+              ),
+            );
     if (responseModel.isSuccess) {
+      PostItem postItem = PostItem(
+        postsConfig.posts[index].fileFullNamePath,
+        value: (responseModel.message as String).trimRight(),
+      );
       selectedPostIndex = index;
-      widget.postListController.onClickPostTitle(responseModel.message);
+      widget.postListController.onClickPostTitle(postItem);
     } else {
       selectedPostIndex = -1;
       widget.postListController.onClickPostTitle(null);

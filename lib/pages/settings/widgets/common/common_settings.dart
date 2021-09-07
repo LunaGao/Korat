@@ -76,16 +76,6 @@ Widget uploadBox(
   );
 }
 
-Uint8List string2Uint8list(String s) {
-  var encodedString = utf8.encode(s);
-  var encodedLength = encodedString.length;
-  var data = ByteData(encodedLength + 4);
-  data.setUint32(0, encodedLength, Endian.big);
-  var bytes = data.buffer.asUint8List();
-  bytes.setRange(4, encodedLength + 4, encodedString);
-  return bytes;
-}
-
 getAndDisplayInputItem(
   String key,
   TextEditingController textEditingController,

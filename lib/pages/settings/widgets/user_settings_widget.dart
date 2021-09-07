@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/config_file_path.dart';
 import 'package:korat/config/content_type_config.dart';
 import 'package:korat/config/setting_config.dart';
@@ -36,12 +37,15 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
   }
 
   getData() async {
-    var response = await widget.platformClient.getObject<Map<String, dynamic>>(
-      ConfigFilePath.userSettingPath,
-      contentType: ContentTypeConfig.json,
+    var response = await widget.platformClient.getObject<String>(
+      ObjModel(
+        ConfigFilePath.userSettingPath,
+        null,
+        ContentTypeConfig.json,
+      ),
     );
     if (response.isSuccess) {
-      data = response.message!;
+      data = jsonDecode(response.message!);
       getAndDisplayInputItem(
           SettingsConfig.userNameKey, userNameEditingController, data);
       getAndDisplayInputItem(
@@ -61,9 +65,11 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
           DateTime.now().millisecondsSinceEpoch.toString() +
           ".$userAvatarExtension";
       await widget.platformClient.putObject(
-        userAvatarPath,
-        userAvatarFileBytes!,
-        contentType: "image/$userAvatarExtension",
+        ObjModel(
+          userAvatarPath,
+          userAvatarFileBytes!,
+          "image/$userAvatarExtension",
+        ),
       );
     }
     var items = Map<String, dynamic>();
@@ -72,9 +78,11 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
     setItem(SettingsConfig.blogLogoKey, null, items, value: userAvatarPath);
     widget.platformClient
         .putObject(
-      ConfigFilePath.userSettingPath,
-      jsonEncode(items),
-      contentType: ContentTypeConfig.json,
+      ObjModel(
+        ConfigFilePath.userSettingPath,
+        jsonEncode(items),
+        ContentTypeConfig.json,
+      ),
     )
         .then((value) {
       EasyLoading.showSuccess("保存成功");
@@ -134,15 +142,17 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
     var item = items[key];
     var path = item["value"] as String;
     widget.platformClient
-        .getObject<String>(
-      path,
-      contentType: ContentTypeConfig.ico,
+        .getObject<Uint8List>(
+      ObjModel(
+        path,
+        null,
+        ContentTypeConfig.ico,
+      ),
     )
         .then((value) {
       if (value.isSuccess) {
-        userAvatarFileBytes = string2Uint8list(value.message!);
         userAvatarWidget = Image.memory(
-          userAvatarFileBytes!,
+          value.message!,
           width: 60,
           height: 60,
         );

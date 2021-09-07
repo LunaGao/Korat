@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/config_file_path.dart';
 import 'package:korat/config/content_type_config.dart';
 import 'package:korat/config/setting_config.dart';
@@ -38,12 +39,15 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
   }
 
   getData() async {
-    var response = await widget.platformClient.getObject<Map<String, dynamic>>(
-      ConfigFilePath.blogSettingPath,
-      contentType: ContentTypeConfig.json,
+    var response = await widget.platformClient.getObject<String>(
+      ObjModel(
+        ConfigFilePath.blogSettingPath,
+        null,
+        ContentTypeConfig.json,
+      ),
     );
     if (response.isSuccess) {
-      data = response.message!;
+      data = jsonDecode(response.message!);
       getAndDisplayInputItem(
           SettingsConfig.blogTitleKey, blogTitleEditingController, data);
       getAndDisplayInputItem(
@@ -69,9 +73,11 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
           DateTime.now().millisecondsSinceEpoch.toString() +
           ".ico";
       await widget.platformClient.putObject(
-        blogIconPath,
-        blogIconFileBytes!,
-        contentType: ContentTypeConfig.ico,
+        ObjModel(
+          blogIconPath,
+          blogIconFileBytes!,
+          ContentTypeConfig.ico,
+        ),
       );
     }
     var items = Map<String, dynamic>();
@@ -83,9 +89,11 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
     setItem(SettingsConfig.blogLogoKey, null, items, value: blogIconPath);
     widget.platformClient
         .putObject(
-      ConfigFilePath.blogSettingPath,
-      jsonEncode(items),
-      contentType: ContentTypeConfig.json,
+      ObjModel(
+        ConfigFilePath.blogSettingPath,
+        jsonEncode(items),
+        ContentTypeConfig.json,
+      ),
     )
         .then((value) {
       EasyLoading.showSuccess("保存成功");
@@ -99,15 +107,17 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
     var item = items[key];
     var path = item["value"] as String;
     widget.platformClient
-        .getObject<String>(
-      path,
-      contentType: ContentTypeConfig.ico,
+        .getObject<Uint8List>(
+      ObjModel(
+        path,
+        null,
+        ContentTypeConfig.ico,
+      ),
     )
         .then((value) {
       if (value.isSuccess) {
-        blogIconFileBytes = string2Uint8list(value.message!);
         blogLogoWidget = Image.memory(
-          blogIconFileBytes!,
+          value.message!,
           width: 20,
           height: 20,
         );
