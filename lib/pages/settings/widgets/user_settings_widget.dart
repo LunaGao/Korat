@@ -75,7 +75,7 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
     var items = Map<String, dynamic>();
     setItem(SettingsConfig.userNameKey, userNameEditingController, items);
     setItem(SettingsConfig.userDetailKey, userDetailEditingController, items);
-    setItem(SettingsConfig.blogLogoKey, null, items, value: userAvatarPath);
+    setItem(SettingsConfig.userAvatarKey, null, items, value: userAvatarPath);
     widget.platformClient
         .putObject(
       ObjModel(

@@ -9,8 +9,6 @@ import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
-import 'package:korat/models/post.dart';
-import 'package:korat/models/post_item.dart';
 import 'package:http/http.dart' as http;
 
 class AliyunOSSClient extends PlatformClient {
