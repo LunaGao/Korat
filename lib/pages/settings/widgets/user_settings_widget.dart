@@ -69,6 +69,7 @@ class _UserSettingsWidgetState extends State<UserSettingsWidget> {
           userAvatarPath,
           userAvatarFileBytes!,
           "image/$userAvatarExtension",
+          isPublic: true,
         ),
       );
     }

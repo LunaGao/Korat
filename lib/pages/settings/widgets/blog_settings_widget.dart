@@ -77,6 +77,7 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
           blogIconPath,
           blogIconFileBytes!,
           ContentTypeConfig.ico,
+          isPublic: true,
         ),
       );
     }

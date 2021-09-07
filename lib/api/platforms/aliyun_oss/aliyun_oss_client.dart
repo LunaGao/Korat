@@ -26,6 +26,7 @@ class AliyunOSSClient extends PlatformClient {
       contentLength: objModel.value.length,
       filePath: objModel.fileFullNamePath,
       contentType: objModel.contentType,
+      isPublic: objModel.isPublic,
     );
     var url = Uri.parse('${this.baseUrl}${objModel.fileFullNamePath}');
     try {
@@ -116,6 +117,7 @@ class AliyunOSSClient extends PlatformClient {
     int contentLength = 0,
     String filePath = '',
     String contentType = '',
+    bool isPublic = false,
   }) {
     var date = _httpDateNow();
     var authorization = _getAuthorization(
@@ -125,6 +127,7 @@ class AliyunOSSClient extends PlatformClient {
       date,
       contentType: contentType,
       path: filePath,
+      isPublic: isPublic,
     );
     var headers = {
       'x-oss-date': date,
@@ -132,6 +135,9 @@ class AliyunOSSClient extends PlatformClient {
       'Connection': 'keep-alive',
       'Content-Type': contentType,
     };
+    if (isPublic) {
+      headers.putIfAbsent("x-oss-object-acl", () => "public-read");
+    }
     if (contentLength == 0) {
       headers.putIfAbsent(
           Headers.contentLengthHeader, () => contentLength.toString());
@@ -174,10 +180,14 @@ class AliyunOSSClient extends PlatformClient {
     String date, {
     String path = '',
     String contentType = '',
+    bool isPublic = false,
   }) {
     path = "/${platformModel.bucket}/" + path;
-    String signature =
-        "$httpMethod\n\n$contentType\n$date\nx-oss-date:$date\n$path";
+    String signature = "$httpMethod\n\n$contentType\n$date\nx-oss-date:$date\n";
+    if (isPublic) {
+      signature += "x-oss-object-acl:public-read\n";
+    }
+    signature += "$path";
     var hmac = new Hmac(sha1, utf8.encode(keySecret));
     var digest = hmac.convert(utf8.encode(signature));
     var returnSignature = base64Encode(digest.bytes);
