@@ -7,16 +7,16 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/platforms/model/object_model.dart';
-import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:http/http.dart' as http;
+import 'package:korat/models/project.dart';
 
 class AliyunOSSClient extends PlatformClient {
-  final PlatformModel platformModel;
+  final ProjectModel projectModel;
   late String baseUrl;
 
-  AliyunOSSClient(this.platformModel) {
-    this.baseUrl = "http://${platformModel.bucket}.${platformModel.endPoint}/";
+  AliyunOSSClient(this.projectModel) {
+    this.baseUrl = "http://${projectModel.bucket}.${projectModel.endPoint}/";
   }
 
   @override
@@ -43,7 +43,7 @@ class AliyunOSSClient extends PlatformClient {
       } else {
         return ResponseModel<String>(
           isSuccess: false,
-          errorMessage: "",
+          errorMessage: response.body,
         );
       }
     } catch (e) {
@@ -79,7 +79,7 @@ class AliyunOSSClient extends PlatformClient {
           message: (response.body as T),
         );
       } else {
-        return ResponseModel<T>(isSuccess: false, errorMessage: "");
+        return ResponseModel<T>(isSuccess: false, errorMessage: response.body);
       }
     } catch (e) {
       return ResponseModel<T>(isSuccess: false, errorMessage: e.toString());
@@ -88,24 +88,22 @@ class AliyunOSSClient extends PlatformClient {
 
   @override
   Future<ResponseModel<String>> deleteObject(ObjModel objModel) async {
-    var options = _getOptions(
+    var headers = _getHeaders(
       'DELETE',
-      file: objModel.fileFullNamePath,
+      filePath: objModel.fileFullNamePath,
     );
+    var url = Uri.parse('${this.baseUrl}${objModel.fileFullNamePath}');
     try {
-      var response = await Dio().delete(
-        "${this.baseUrl}${objModel.fileFullNamePath}",
-        options: options,
+      var response = await http.delete(
+        url,
+        headers: headers,
       );
-      if (200 <= response.statusCode! && response.statusCode! < 300) {
+      if (200 <= response.statusCode && response.statusCode < 300) {
         return ResponseModel<String>(isSuccess: true, message: '');
       } else {
         return ResponseModel<String>(
-            isSuccess: false, errorMessage: response.data);
+            isSuccess: false, errorMessage: response.body);
       }
-    } on DioError catch (e) {
-      return ResponseModel<String>(
-          isSuccess: false, errorMessage: e.response!.data);
     } catch (e) {
       return ResponseModel<String>(
           isSuccess: false, errorMessage: e.toString());
@@ -121,8 +119,8 @@ class AliyunOSSClient extends PlatformClient {
   }) {
     var date = _httpDateNow();
     var authorization = _getAuthorization(
-      this.platformModel.keyId,
-      this.platformModel.keySecret,
+      this.projectModel.keyId,
+      this.projectModel.keySecret,
       httpMethod,
       date,
       contentType: contentType,
@@ -145,34 +143,6 @@ class AliyunOSSClient extends PlatformClient {
     return headers;
   }
 
-  Options _getOptions(
-    String httpMethod, {
-    int contentLength = 0,
-    String file = '',
-    String contentType = '',
-  }) {
-    var date = _httpDateNow();
-    var authorization = _getAuthorization(
-      this.platformModel.keyId,
-      this.platformModel.keySecret,
-      httpMethod,
-      date,
-      contentType: contentType,
-      path: file,
-    );
-    var headers = {
-      'x-oss-date': date,
-      'Authorization': authorization,
-      'Connection': 'keep-alive',
-      'Content-Type': contentType,
-      Headers.contentLengthHeader: contentLength,
-    };
-
-    return Options(
-      headers: headers,
-    );
-  }
-
   String _getAuthorization(
     String keyId,
     String keySecret,
@@ -182,7 +152,7 @@ class AliyunOSSClient extends PlatformClient {
     String contentType = '',
     bool isPublic = false,
   }) {
-    path = "/${platformModel.bucket}/" + path;
+    path = "/${projectModel.bucket}/" + path;
     String signature = "$httpMethod\n\n$contentType\n$date\nx-oss-date:$date\n";
     if (isPublic) {
       signature += "x-oss-object-acl:public-read\n";

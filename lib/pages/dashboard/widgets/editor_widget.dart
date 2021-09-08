@@ -4,6 +4,7 @@ import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/content_type_config.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post_item.dart';
+import 'package:korat/models/project.dart';
 
 class EditorWidget extends StatefulWidget {
   final EditorController editorController;
@@ -184,8 +185,8 @@ class EditorController {
   bool _showWelcomePage = true;
   PlatformClient? _platform;
 
-  void setStorePlatform(PlatformClient oss) {
-    this._platform = oss;
+  void setCurrentProject(ProjectModel projectModel) {
+    this._platform = getPlatformClient(projectModel);
   }
 
   PlatformClient getPlatform() {

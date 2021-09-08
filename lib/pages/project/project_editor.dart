@@ -1,36 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:korat/api/leancloud/platform_api.dart';
+import 'package:korat/api/leancloud/project_api.dart';
 import 'package:korat/common/global.dart';
 import 'package:korat/config/platform_config.dart';
-import 'package:korat/models/platform.dart';
 import 'package:korat/models/platform_client.dart';
+import 'package:korat/models/project.dart';
+import 'package:korat/routes/app_routes.dart';
 
-class PlatformEditor extends StatefulWidget {
-  const PlatformEditor({Key? key}) : super(key: key);
+class ProjectEditorPage extends StatefulWidget {
+  const ProjectEditorPage({Key? key}) : super(key: key);
 
   @override
-  _PlatformEditorState createState() => _PlatformEditorState();
+  _ProjectEditorPageState createState() => _ProjectEditorPageState();
 }
 
-class _PlatformEditorState extends State<PlatformEditor> {
+class _ProjectEditorPageState extends State<ProjectEditorPage> {
   bool _isLoading = true;
   String _title = '';
   List<String> platformList = [
     '请选择平台',
     PlatformConfig.aliyunOSS,
   ];
-  PlatformPageArguments? _arg;
-  PlatformModel? _platformModel;
+  ProjectEditorPageArguments? _arg;
+  ProjectModel? _platformModel;
   String _selectedValue = '';
-  TextEditingController _dataBucketTextEditingController =
-      TextEditingController();
-  TextEditingController _dataEndPointTextEditingController =
-      TextEditingController();
-  TextEditingController _dataKeyIdTextEditingController =
-      TextEditingController();
-  TextEditingController _dataKeySecretTextEditingController =
-      TextEditingController();
+  var _nameTextEditingController = TextEditingController();
+  var _dataBucketTextEditingController = TextEditingController();
+  var _dataEndPointTextEditingController = TextEditingController();
+  var _dataKeyIdTextEditingController = TextEditingController();
+  var _dataKeySecretTextEditingController = TextEditingController();
 
   @override
   void initState() {
@@ -39,10 +37,11 @@ class _PlatformEditorState extends State<PlatformEditor> {
   }
 
   void getData(String objectId) async {
-    var response = await PlatformApi().getPlatformById(objectId);
+    var response = await ProjectApi().getProjectById(objectId);
     if (response.isSuccess) {
       this._platformModel = response.message;
       this._selectedValue = this._platformModel!.platform;
+      this._nameTextEditingController.text = this._platformModel!.name;
       this._dataBucketTextEditingController.text = this._platformModel!.bucket;
       this._dataEndPointTextEditingController.text =
           this._platformModel!.endPoint;
@@ -61,10 +60,15 @@ class _PlatformEditorState extends State<PlatformEditor> {
       EasyLoading.showError("没有找到要保存的内容哦");
       return;
     }
+    var name = _nameTextEditingController.text;
     var endpoint = _dataEndPointTextEditingController.text;
     var bucket = _dataBucketTextEditingController.text;
     var accessKeyId = _dataKeyIdTextEditingController.text;
     var accessKeySecret = _dataKeySecretTextEditingController.text;
+    if (name.isEmpty) {
+      EasyLoading.showError("名称 不可为空哦");
+      return;
+    }
     if (endpoint.isEmpty) {
       EasyLoading.showError("End Point 不可为空哦");
       return;
@@ -83,11 +87,13 @@ class _PlatformEditorState extends State<PlatformEditor> {
     }
     if (this._platformModel == null) {
       //创建
-      var response = await PlatformApi().createAliyunOSSPlatform(
+      var response = await ProjectApi().createProject(
+        name,
         endpoint,
         bucket,
         accessKeyId,
         accessKeySecret,
+        PlatformConfig.aliyunOSS,
         Global.user!.objectId,
       );
       if (response.isSuccess) {
@@ -97,15 +103,21 @@ class _PlatformEditorState extends State<PlatformEditor> {
       }
     } else {
       //更新
-      var response = await PlatformApi().updateAliyunOSSPlatform(
+      var response = await ProjectApi().updateProject(
         this._platformModel!.objectId,
+        name,
         endpoint,
         bucket,
         accessKeyId,
         accessKeySecret,
+        PlatformConfig.aliyunOSS,
       );
       if (response.isSuccess) {
-        Navigator.of(context).pop<bool>(true);
+        if (_arg!.type == ProjectType.first) {
+          Navigator.of(context).popAndPushNamed(AppRoute.dashboard);
+        } else {
+          Navigator.of(context).pop<bool>(true);
+        }
       } else {
         EasyLoading.showError(response.errorMessage);
       }
@@ -115,16 +127,20 @@ class _PlatformEditorState extends State<PlatformEditor> {
   @override
   Widget build(BuildContext context) {
     if (_arg == null) {
-      _arg =
-          ModalRoute.of(context)!.settings.arguments as PlatformPageArguments;
+      _arg = ModalRoute.of(context)!.settings.arguments
+          as ProjectEditorPageArguments;
       switch (_arg!.type) {
-        case PlatformType.create:
-          this._title = "创建平台";
+        case ProjectType.create:
+          this._title = "创建项目";
           _isLoading = false;
           break;
-        case PlatformType.modify:
-          this._title = "修改平台";
-          getData(_arg!.platformModel!.objectId);
+        case ProjectType.modify:
+          this._title = "修改项目";
+          getData(_arg!.projectModel!.objectId);
+          break;
+        case ProjectType.first:
+          this._title = "创建项目";
+          _isLoading = false;
           break;
       }
     }
@@ -173,6 +189,10 @@ class _PlatformEditorState extends State<PlatformEditor> {
                   "Id: " + this._platformModel!.objectId,
                 ),
               ),
+        _inputBox(
+          "名称",
+          this._nameTextEditingController,
+        ),
         _dropDownButton(
           0,
         ),
@@ -236,7 +256,7 @@ class _PlatformEditorState extends State<PlatformEditor> {
             child: Text(
               value == '请选择平台'
                   ? '请选择平台'
-                  : getDisplayPlatformNameFromString(value),
+                  : getDisplayProjectNameFromString(value),
             ),
           );
         }).toList(),
@@ -266,17 +286,18 @@ class _PlatformEditorState extends State<PlatformEditor> {
   }
 }
 
-class PlatformPageArguments {
-  final PlatformType type;
-  final PlatformModel? platformModel;
+class ProjectEditorPageArguments {
+  final ProjectType type;
+  final ProjectModel? projectModel;
 
-  PlatformPageArguments(
+  ProjectEditorPageArguments(
     this.type, {
-    this.platformModel,
+    this.projectModel,
   });
 }
 
-enum PlatformType {
+enum ProjectType {
+  first,
   create,
   modify,
 }

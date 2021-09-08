@@ -1,10 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/platforms/aliyun_oss/aliyun_oss_client.dart';
 import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/platform_config.dart';
-import 'package:korat/models/platform.dart';
+import 'package:korat/models/project.dart';
 
 abstract class PlatformClient {
   Future<ResponseModel<String>> putObject(ObjModel objModel);
@@ -12,21 +10,21 @@ abstract class PlatformClient {
   Future<ResponseModel<String>> deleteObject(ObjModel objModel);
 }
 
-PlatformClient getPlatformClient(PlatformModel platformModel) {
-  if (platformModel.platform == PlatformConfig.aliyunOSS) {
+PlatformClient getPlatformClient(ProjectModel projectModel) {
+  if (projectModel.platform == PlatformConfig.aliyunOSS) {
     return AliyunOSSClient(
-      platformModel,
+      projectModel,
     );
   } else {
     //TODO: 这里需要搞一个空的返回值
     return AliyunOSSClient(
-      platformModel,
+      projectModel,
     );
   }
 }
 
-String getDisplayPlatformNameFromString(String? platformName) {
-  if (platformName == PlatformConfig.aliyunOSS) {
+String getDisplayProjectNameFromString(String? projectName) {
+  if (projectName == PlatformConfig.aliyunOSS) {
     return "aliyun oss";
   } else {
     return "未设置";

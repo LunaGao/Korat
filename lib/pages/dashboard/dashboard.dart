@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/base_model/user.dart';
-import 'package:korat/api/leancloud/platform_group_api.dart';
+import 'package:korat/api/leancloud/project_api.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/pages/dashboard/widgets/dashboard_appbar.dart';
-import 'package:korat/pages/platform/platform_group/platform_group_editor.dart';
 import 'package:korat/pages/dashboard/widgets/editor_widget.dart';
 import 'package:korat/pages/dashboard/widgets/post_list_widget.dart';
 import 'package:korat/pages/dashboard/widgets/preview_widget.dart';
 import 'package:korat/pages/dashboard/widgets/utils_widget.dart';
+import 'package:korat/pages/project/project_editor.dart';
 import 'package:korat/routes/app_routes.dart';
 
 class DashBoardPage extends StatefulWidget {
@@ -21,7 +21,6 @@ class DashBoardPage extends StatefulWidget {
 class _DashBoardPageState extends State<DashBoardPage> {
   bool loading = true;
   User user = User();
-  bool emptyPlatform = false;
   PlatformClient? platformClient;
   AppbarController appbarController = AppbarController();
   EditorController editorController = EditorController();
@@ -46,13 +45,13 @@ class _DashBoardPageState extends State<DashBoardPage> {
       this.user = user;
       getData();
     });
-    appbarController.addChangePlatformGroupCallback((platformGroup) {
-      if (platformGroup.dataPlatform == null) {
+    appbarController.addChangeProjectCallback((project) {
+      if (project.name == '') {
         Navigator.of(context).popAndPushNamed(
-          AppRoute.platform_group_editor,
-          arguments: PlatformGroupPageArguments(
-            PlatformGroupType.modify,
-            platformGroup: platformGroup,
+          AppRoute.project_editor,
+          arguments: ProjectEditorPageArguments(
+            ProjectType.modify,
+            projectModel: project,
           ),
         );
       }
@@ -60,28 +59,23 @@ class _DashBoardPageState extends State<DashBoardPage> {
   }
 
   void getData() async {
-    var platformGroupsResponse =
-        await PlatformGroupApi().getMyPlatformGroups(user.objectId);
-    if (platformGroupsResponse.isSuccess) {
-      if (platformGroupsResponse.message!.length == 0) {
+    var projectResponse = await ProjectApi().getMyProjects(user.objectId);
+    if (projectResponse.isSuccess) {
+      if (projectResponse.message!.length == 0) {
         Navigator.of(context).popAndPushNamed(
-          AppRoute.platform_group_editor,
-          arguments: PlatformGroupPageArguments(
-            PlatformGroupType.first,
+          AppRoute.project_editor,
+          arguments: ProjectEditorPageArguments(
+            ProjectType.first,
           ),
         );
         return;
       } else {
-        appbarController.setPlatformGroups(platformGroupsResponse.message!);
-        postListController
-            .setCurrentPlatformGroup(platformGroupsResponse.message![0]);
-        var dataPlatform = platformGroupsResponse.message![0].dataPlatform!;
-        platformClient = getPlatformClient(dataPlatform);
-        postListController.setStorePlatform(platformClient!);
-        editorController.setStorePlatform(platformClient!);
+        appbarController.setProjectModels(projectResponse.message!);
+        postListController.setCurrentProject(projectResponse.message![0]);
+        editorController.setCurrentProject(projectResponse.message![0]);
       }
     } else {
-      EasyLoading.showError(platformGroupsResponse.errorMessage);
+      EasyLoading.showError(projectResponse.errorMessage);
     }
     loading = false;
     setState(() {});
@@ -110,13 +104,13 @@ class _DashBoardPageState extends State<DashBoardPage> {
           user,
         ),
         Expanded(
-          child: platformWidget(),
+          child: projectWidget(),
         ),
       ],
     );
   }
 
-  Widget platformWidget() {
+  Widget projectWidget() {
     return Row(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,

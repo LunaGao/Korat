@@ -9,11 +9,11 @@ import 'package:korat/config/config_file_path.dart';
 import 'package:korat/config/content_type_config.dart';
 import 'package:korat/logic/publish_client.dart';
 import 'package:korat/models/platform_client.dart';
-import 'package:korat/models/platform_group.dart';
 import 'package:korat/models/post.dart';
 import 'package:korat/models/post_config.dart';
 import 'package:korat/models/post_item.dart';
-import 'package:korat/pages/settings/platform_group_settings.dart';
+import 'package:korat/models/project.dart';
+import 'package:korat/pages/settings/project_settings.dart';
 import 'package:korat/routes/app_routes.dart';
 
 class PostListWidget extends StatefulWidget {
@@ -107,9 +107,9 @@ class _PostListWidgetState extends State<PostListWidget> {
 
   onClickSettingsButton() {
     Navigator.of(context).pushNamed(
-      AppRoute.platform_group_settings,
-      arguments: PlatformGroupSettingsPageArguments(
-        widget.postListController.getCurrentPlatformGroup(),
+      AppRoute.project_settings,
+      arguments: ProjectSettingsPageArguments(
+        widget.postListController.getCurrentProject(),
       ),
     );
   }
@@ -126,7 +126,7 @@ class _PostListWidgetState extends State<PostListWidget> {
           maskType: EasyLoadingMaskType.black,
         );
         await PublishClient()
-            .publish(widget.postListController.getCurrentPlatformGroup());
+            .publish(widget.postListController.getCurrentProject());
         await EasyLoading.dismiss();
         EasyLoading.showSuccess("发布成功");
       }
@@ -291,24 +291,18 @@ class _PostListWidgetState extends State<PostListWidget> {
 }
 
 class PostListController {
-  PlatformGroup? _platformGroup;
+  ProjectModel? _project;
   PlatformClient? _platform;
   PostCallback? _postCallback;
   VoidCallback? _postListListener;
 
-  void setCurrentPlatformGroup(PlatformGroup platformGroup) {
-    this._platformGroup = platformGroup;
+  void setCurrentProject(ProjectModel projectModel) {
+    this._project = projectModel;
+    this._platform = getPlatformClient(projectModel);
   }
 
-  PlatformGroup getCurrentPlatformGroup() {
-    return this._platformGroup!;
-  }
-
-  void setStorePlatform(PlatformClient oss) {
-    this._platform = oss;
-    if (this._postListListener != null) {
-      this._postListListener!();
-    }
+  ProjectModel getCurrentProject() {
+    return this._project!;
   }
 
   PlatformClient getPlatform() {

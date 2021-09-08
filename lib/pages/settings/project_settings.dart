@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:korat/models/platform_client.dart';
-import 'package:korat/models/platform_group.dart';
+import 'package:korat/models/project.dart';
 import 'package:korat/pages/dashboard/widgets/utils_widget.dart';
 import 'package:korat/pages/settings/widgets/blog_settings_widget.dart';
 import 'package:korat/pages/settings/widgets/style_settings_widget.dart';
 import 'package:korat/pages/settings/widgets/user_settings_widget.dart';
 
-class PlatformGroupSettingsPage extends StatefulWidget {
-  const PlatformGroupSettingsPage({Key? key}) : super(key: key);
+class ProjectSettingsPage extends StatefulWidget {
+  const ProjectSettingsPage({Key? key}) : super(key: key);
 
   @override
-  _PlatformGroupSettingsPageState createState() =>
-      _PlatformGroupSettingsPageState();
+  _ProjectSettingsPageState createState() => _ProjectSettingsPageState();
 }
 
-class _PlatformGroupSettingsPageState extends State<PlatformGroupSettingsPage> {
-  PlatformGroupSettingsPageArguments? _arg;
-  PlatformGroup? platformGroup;
+class _ProjectSettingsPageState extends State<ProjectSettingsPage> {
+  ProjectSettingsPageArguments? _arg;
+  ProjectModel? project;
   List<String> settingsItems = [
     "博客设置",
     "作者设置",
@@ -34,11 +33,9 @@ class _PlatformGroupSettingsPageState extends State<PlatformGroupSettingsPage> {
   Widget settingsContentWidget(int index) {
     switch (index) {
       case 0:
-        return BlogSettingsWidget(
-            getPlatformClient(platformGroup!.dataPlatform!));
+        return BlogSettingsWidget(getPlatformClient(project!));
       case 1:
-        return UserSettingsWidget(
-            getPlatformClient(platformGroup!.dataPlatform!));
+        return UserSettingsWidget(getPlatformClient(project!));
       case 2:
         return StyleSettingsWidget();
     }
@@ -49,15 +46,15 @@ class _PlatformGroupSettingsPageState extends State<PlatformGroupSettingsPage> {
   Widget build(BuildContext context) {
     if (_arg == null) {
       _arg = ModalRoute.of(context)!.settings.arguments
-          as PlatformGroupSettingsPageArguments;
-      platformGroup = _arg!.platformGroup;
+          as ProjectSettingsPageArguments;
+      project = _arg!.projectModel;
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            Text(platformGroup!.name + " 设置"),
+            Text(project!.name + " 设置"),
           ],
         ),
       ),
@@ -99,10 +96,10 @@ class _PlatformGroupSettingsPageState extends State<PlatformGroupSettingsPage> {
   }
 }
 
-class PlatformGroupSettingsPageArguments {
-  final PlatformGroup platformGroup;
+class ProjectSettingsPageArguments {
+  final ProjectModel projectModel;
 
-  PlatformGroupSettingsPageArguments(
-    this.platformGroup,
+  ProjectSettingsPageArguments(
+    this.projectModel,
   );
 }

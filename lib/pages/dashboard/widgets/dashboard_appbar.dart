@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:korat/api/base_model/user.dart';
 import 'package:korat/common/global.dart';
-import 'package:korat/models/platform_group.dart';
+import 'package:korat/models/project.dart';
 import 'package:korat/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,21 +22,21 @@ class DashboardAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _DashboardAppBarState extends State<DashboardAppBar> {
   List<PopupMenuEntry<String>> popupMenuItems = [];
   String selectedPopupMenuItemTitle = "";
-  List<PlatformGroup>? platformGroups;
+  List<ProjectModel>? projects;
 
   @override
   initState() {
     super.initState();
-    widget.appbarController.addPlatformGroupsListener(
-      (platformGroups) => setPlatformGroups(platformGroups),
+    widget.appbarController.addProjectsListener(
+      (_projects) => setProject(_projects),
     );
     getUserData();
   }
 
-  void setPlatformGroups(List<PlatformGroup> platformGroups) {
+  void setProject(List<ProjectModel> projectList) {
     popupMenuItems.clear();
-    this.platformGroups = platformGroups;
-    for (PlatformGroup item in platformGroups) {
+    this.projects = projectList;
+    for (ProjectModel item in projectList) {
       var value = PopupMenuItem(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -48,14 +48,16 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
       );
       popupMenuItems.add(value);
     }
-    selectedPopupMenuItemTitle = platformGroups[0].name;
-    onSelectedPlatformGroup(selectedPopupMenuItemTitle);
+    selectedPopupMenuItemTitle = projectList[0].name;
+    onSelectedProject(selectedPopupMenuItemTitle);
     setState(() {});
   }
 
-  void onSelectedPlatformGroup(String platformName) {
-    for (var item in this.platformGroups!) {
-      widget.appbarController.sendChangePlatformGroupCallback(item);
+  void onSelectedProject(String projectName) {
+    for (var item in this.projects!) {
+      if (item.name == projectName) {
+        widget.appbarController.sendChangeProjectCallback(item);
+      }
     }
   }
 
@@ -79,7 +81,7 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
           popupMenuItems.isEmpty
               ? Container()
               : PopupMenuButton<String>(
-                  tooltip: "选择平台组",
+                  tooltip: "选择项目",
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -102,16 +104,16 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
                     ),
                   ),
                   onSelected: (value) {
-                    onSelectedPlatformGroup(value);
+                    onSelectedProject(value);
                   },
                   itemBuilder: (BuildContext context) => popupMenuItems,
                 ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(AppRoute.platform_group_list);
+              Navigator.of(context).pushNamed(AppRoute.project_list);
             },
             child: Text(
-              "平台组管理",
+              "项目管理",
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -143,8 +145,8 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
 
 class AppbarController {
   UserCallback? _userCallback;
-  PlatformGroupsCallback? _platformGroupsCallback;
-  ChangePlatformGroupCallback? _changePlatformGroupCallback;
+  ProjectsCallback? _projectsCallback;
+  ChangeProjectCallback? _changeProjectCallback;
 
   addUserListener(UserCallback callback) {
     this._userCallback = callback;
@@ -154,25 +156,23 @@ class AppbarController {
     this._userCallback!(user);
   }
 
-  addChangePlatformGroupCallback(ChangePlatformGroupCallback callback) {
-    this._changePlatformGroupCallback = callback;
+  addChangeProjectCallback(ChangeProjectCallback callback) {
+    this._changeProjectCallback = callback;
   }
 
-  sendChangePlatformGroupCallback(PlatformGroup platformGroup) {
-    this._changePlatformGroupCallback!(platformGroup);
+  sendChangeProjectCallback(ProjectModel project) {
+    this._changeProjectCallback!(project);
   }
 
-  addPlatformGroupsListener(PlatformGroupsCallback callback) {
-    this._platformGroupsCallback = callback;
+  addProjectsListener(ProjectsCallback callback) {
+    this._projectsCallback = callback;
   }
 
-  setPlatformGroups(List<PlatformGroup> platformGroups) {
-    this._platformGroupsCallback!(platformGroups);
+  setProjectModels(List<ProjectModel> projects) {
+    this._projectsCallback!(projects);
   }
 }
 
 typedef UserCallback = void Function(User user);
-typedef PlatformGroupsCallback = void Function(
-    List<PlatformGroup> platformGroups);
-typedef ChangePlatformGroupCallback = void Function(
-    PlatformGroup platformGroup);
+typedef ProjectsCallback = void Function(List<ProjectModel> projects);
+typedef ChangeProjectCallback = void Function(ProjectModel project);

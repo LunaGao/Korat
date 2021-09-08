@@ -1,13 +1,12 @@
 import 'dart:js';
 
 import 'package:flutter/material.dart';
-import 'package:korat/pages/platform/platform/platform_editor.dart';
-import 'package:korat/pages/platform/platform_group/platform_group_editor.dart';
 import 'package:korat/pages/dashboard/dashboard.dart';
-import 'package:korat/pages/platform/platform_group/platform_group_list.dart';
+import 'package:korat/pages/project/project_editor.dart';
+import 'package:korat/pages/project/project_list.dart';
 import 'package:korat/pages/public/error.dart';
 import 'package:korat/pages/public/home.dart';
-import 'package:korat/pages/settings/platform_group_settings.dart';
+import 'package:korat/pages/settings/project_settings.dart';
 import 'package:korat/pages/signin/signin.dart';
 import 'package:korat/pages/signup/signup.dart';
 import 'app_routes.dart';
@@ -19,11 +18,9 @@ class WebRoute {
       AppRoute.signin: (context) => SignInPage(),
       AppRoute.signup: (context) => SignUpPage(),
       AppRoute.dashboard: (context) => DashBoardPage(),
-      AppRoute.platform_group_editor: (context) => PlatformGroupEditorPage(),
-      AppRoute.platform_group_list: (context) => PlatformGroupList(),
-      AppRoute.platform_editor: (context) => PlatformEditor(),
-      AppRoute.platform_group_settings: (context) =>
-          PlatformGroupSettingsPage(),
+      AppRoute.project_editor: (context) => ProjectEditorPage(),
+      AppRoute.project_list: (context) => ProjectListPage(),
+      AppRoute.project_settings: (context) => ProjectSettingsPage(),
     };
   }
 
