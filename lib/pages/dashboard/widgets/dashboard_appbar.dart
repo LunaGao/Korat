@@ -74,10 +74,6 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
     return AppBar(
       title: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text("操作台"),
-          ),
           popupMenuItems.isEmpty
               ? Container()
               : PopupMenuButton<String>(

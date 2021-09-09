@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
 import 'package:korat/pages/dashboard/dashboard.dart';
 import 'package:korat/pages/project/project_editor.dart';

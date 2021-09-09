@@ -29,6 +29,7 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
   var recordEditingController = TextEditingController();
   var copyrightEditingController = TextEditingController();
   var data = Map<String, dynamic>();
+  bool isChangedLogo = false;
   Uint8List? blogIconFileBytes;
   Widget? blogLogoWidget;
 
@@ -67,21 +68,29 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
   }
 
   save() async {
-    var blogIconPath = '';
-    if (blogIconFileBytes != null) {
-      blogIconPath = ConfigFilePath.imagePathPrefix +
-          DateTime.now().millisecondsSinceEpoch.toString() +
-          ".ico";
-      await widget.platformClient.putObject(
-        ObjModel(
-          blogIconPath,
-          blogIconFileBytes!,
-          ContentTypeConfig.ico,
-          isPublic: true,
-        ),
-      );
-    }
     var items = Map<String, dynamic>();
+    var blogIconPath = '';
+    if (isChangedLogo) {
+      if (blogIconFileBytes != null) {
+        blogIconPath = ConfigFilePath.imagePathPrefix +
+            DateTime.now().millisecondsSinceEpoch.toString() +
+            ".ico";
+        await widget.platformClient.putObject(
+          ObjModel(
+            blogIconPath,
+            blogIconFileBytes!,
+            ContentTypeConfig.ico,
+            isPublic: true,
+          ),
+        );
+      }
+      isChangedLogo = false;
+    } else {
+      if (data.containsKey(SettingsConfig.blogLogoKey)) {
+        var item = data[SettingsConfig.blogLogoKey];
+        blogIconPath = item["value"];
+      }
+    }
     setItem(SettingsConfig.blogTitleKey, blogTitleEditingController, items);
     setItem(SettingsConfig.blogDomainKey, domainEditingController, items);
     setItem(SettingsConfig.blogDetailKey, blogDetailEditingController, items);
@@ -142,6 +151,7 @@ class _BlogSettingsWidgetState extends State<BlogSettingsWidget> {
         width: 20,
         height: 20,
       );
+      isChangedLogo = true;
       setState(() {});
     } else {
       print("cancel");

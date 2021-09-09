@@ -89,7 +89,7 @@ class _PostListWidgetState extends State<PostListWidget> {
             "",
           );
           postsConfig.posts.add(post);
-          widget.postListController.getPlatform().putObject(
+          await widget.postListController.getPlatform().putObject(
                 ObjModel(
                   ConfigFilePath.postsConfigPath,
                   json.encode(postsConfig),
