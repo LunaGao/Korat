@@ -7,6 +7,7 @@ import 'package:korat/config/content_type_config.dart';
 import 'package:korat/config/setting_config.dart';
 import 'package:korat/config/template.dart';
 import 'package:korat/logic/settings/blog_setting.dart';
+import 'package:korat/logic/settings/post_setting.dart';
 import 'package:korat/logic/settings/user_setting.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post.dart';
@@ -35,28 +36,41 @@ class PublishClient {
       print("error: " + postConfigResponse.errorMessage);
       return;
     }
-    await _publishIndex(platformClient, posts);
+    posts.sort(
+        (a, b) => (int.parse(b.fileName).compareTo(int.parse(a.fileName))));
+    Map<String, String> firstPost = {};
+    Map<String, String> secondPost = {};
+    int index = 0;
     for (Post post in posts) {
-      ResponseModel<String> postResponseModel = await platformClient.getObject(
-        ObjModel(
-          post.fileFullNamePath,
-          ' ',
-          ContentTypeConfig.text,
-        ),
+      var postConfigs = await PostSettingsLogic().getPostSettings(
+        platformClient,
+        post,
       );
-      if (postResponseModel.isSuccess) {
-        var value = postResponseModel.message!.trim();
-        _publishSubPage(platformClient, post, value);
-      } else {
-        print("error: " + postResponseModel.errorMessage);
-        return;
+      if (index == 0) {
+        firstPost = postConfigs;
+      } else if (index == 1) {
+        secondPost = postConfigs;
       }
+      _publishSubPage(
+        platformClient,
+        post,
+        postConfigs[SettingsConfig.postContentKey]!,
+      );
+      index++;
     }
+    await _publishIndex(
+      platformClient,
+      posts,
+      firstPost,
+      secondPost,
+    );
   }
 
   _publishIndex(
     PlatformClient platformClient,
     List<Post> posts,
+    Map<String, String> firstPost,
+    Map<String, String> secondPost,
   ) async {
     // var indexTemplate =
     //     await rootBundle.loadString('assets/templates/index.html');
@@ -65,6 +79,15 @@ class PublishClient {
         .replaceIndexTemplate(indexTemplate, platformClient);
     indexTemplate = await UserSettingsLogic()
         .replaceIndexTemplate(indexTemplate, platformClient);
+    var postTemplate = IndexTemplate().indexItemTemplate;
+    var firstPostTemplate = await BlogSettingsLogic()
+        .replaceIndexPostsTemplate(postTemplate, firstPost);
+    var secondPostTemplate = await BlogSettingsLogic()
+        .replaceIndexPostsTemplate(postTemplate, secondPost);
+    indexTemplate = indexTemplate.replaceAll(
+      "@postListKey@",
+      firstPostTemplate + secondPostTemplate,
+    );
     await platformClient.putObject(
       ObjModel(
         'index.html',

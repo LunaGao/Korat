@@ -6,7 +6,40 @@ class SettingsConfig {
   static final String blogCopyrightKey = 'blogCopyrightKey';
   static final String blogLogoKey = 'blogLogoKey';
 
+  static final List<String> blogConfigKeys = [
+    blogTitleKey,
+    blogDomainKey,
+    blogDetailKey,
+    blogRecordKey,
+    blogCopyrightKey,
+    blogLogoKey,
+  ];
+
   static final String userNameKey = 'userNameKey';
   static final String userDetailKey = 'userDetailKey';
   static final String userAvatarKey = 'userAvatarKey';
+
+  static final List<String> userConfigKeys = [
+    userNameKey,
+    userDetailKey,
+    userAvatarKey,
+  ];
+
+  static final String postListKey = 'postListKey';
+
+  static final String postTitleKey = 'postTitleKey';
+  static final String postContentLongDesKey = 'postContentLongDesKey';
+  static final String postContentShortDesKey = 'postContentShortDesKey';
+  static final String postContentKey = 'postContentKey';
+  static final String postLinkKey = 'postLinkKey';
+  static final String postTimeKey = 'postTimeKey';
+
+  static final List<String> postConfigKeys = [
+    postTitleKey,
+    postContentLongDesKey,
+    postContentShortDesKey,
+    postContentKey,
+    postLinkKey,
+    postTimeKey,
+  ];
 }
