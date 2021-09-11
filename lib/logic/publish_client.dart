@@ -1,86 +1,55 @@
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:korat/api/platforms/model/object_model.dart';
-import 'package:korat/config/content_type_config.dart';
-import 'package:korat/config/setting_config.dart';
-import 'package:korat/config/templates/index_template.dart';
+import 'package:korat/logic/publish_index.dart';
 import 'package:korat/logic/publish_post.dart';
+import 'package:korat/logic/publish_posts.dart';
 import 'package:korat/logic/settings/blog_setting.dart';
 import 'package:korat/logic/settings/post_setting.dart';
 import 'package:korat/logic/settings/user_setting.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post.dart';
 import 'package:korat/models/project.dart';
+import 'package:korat/models/publish_post_item.dart';
 
 class PublishClient {
   BlogSettingsLogic blogSettingsLogic = BlogSettingsLogic();
+  UserSettingsLogic userSettingsLogic = UserSettingsLogic();
+  PostSettingsLogic postSettingsLogic = PostSettingsLogic();
   PublishPost publishPost = PublishPost();
+  PublishIndex publishIndex = PublishIndex();
+  PublishPosts publishPosts = PublishPosts();
 
   publish(ProjectModel projectModel) async {
     var platformClient = getPlatformClient(
       projectModel,
     );
     await blogSettingsLogic.init(platformClient);
+    await userSettingsLogic.init(platformClient);
+    await postSettingsLogic.init(platformClient);
+    await publishIndex.init(platformClient);
     await publishPost.init(platformClient);
-
-    Map<String, String> firstPost = {};
-    Map<String, String> secondPost = {};
-    int index = 0;
-    for (Post post in publishPost.posts) {
-      var postConfigs = await PostSettingsLogic().getPostSettings(
-        platformClient,
+    await publishPosts.init(platformClient);
+    List<PublishPostItem> postItems = [];
+    for (Post post in publishPost.postConfig.posts) {
+      var publishPostItem = await postSettingsLogic.getPublishPostItem(
         post,
       );
-      if (index == 0) {
-        firstPost = postConfigs;
-      } else if (index == 1) {
-        secondPost = postConfigs;
-      }
+      postItems.add(publishPostItem);
       await publishPost.publishSubPage(
-        post,
-        postConfigs[SettingsConfig.postContentKey]!,
+        blogSettingsLogic,
+        userSettingsLogic,
+        publishPostItem,
       );
-      index++;
     }
-    await _publishIndex(
-      platformClient,
-      firstPost,
-      secondPost,
+    await publishPosts.publishPosts(
+      blogSettingsLogic,
+      userSettingsLogic,
+      postSettingsLogic,
+      postItems,
     );
-  }
-
-  _publishIndex(
-    PlatformClient platformClient,
-    Map<String, String> firstPost,
-    Map<String, String> secondPost,
-  ) async {
-    // var indexTemplate =
-    //     await rootBundle.loadString('assets/templates/index.html');
-    var indexTemplate = IndexTemplate().indexTemplate;
-    indexTemplate = await blogSettingsLogic.replaceIndexTemplate(
-      indexTemplate,
-    );
-    indexTemplate = await UserSettingsLogic()
-        .replaceIndexTemplate(indexTemplate, platformClient);
-    var postTemplate = IndexTemplate().indexItemTemplate;
-    var firstPostTemplate = await blogSettingsLogic.replaceIndexPostsTemplate(
-      postTemplate,
-      firstPost,
-    );
-    var secondPostTemplate = await blogSettingsLogic.replaceIndexPostsTemplate(
-      postTemplate,
-      secondPost,
-    );
-    indexTemplate = indexTemplate.replaceAll(
-      "@postListKey@",
-      firstPostTemplate + secondPostTemplate,
-    );
-    await platformClient.putObject(
-      ObjModel(
-        'index.html',
-        indexTemplate,
-        ContentTypeConfig.html,
-        isPublic: true,
-      ),
+    await publishIndex.publishIndex(
+      blogSettingsLogic,
+      userSettingsLogic,
+      postSettingsLogic,
+      postItems,
     );
   }
 }

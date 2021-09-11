@@ -7,8 +7,13 @@ import 'package:korat/config/setting_config.dart';
 import 'package:korat/logic/settings/base_setting_helper.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post.dart';
+import 'package:korat/models/publish_post_item.dart';
 
 class PostSettingsLogic {
+  late PlatformClient platformClient;
+  Future<void> init(PlatformClient platformClient) async {
+    this.platformClient = platformClient;
+  }
   // replaceIndexTemplate(
   //   String indexTemplate,
   //   PlatformClient platformClient,
@@ -30,11 +35,10 @@ class PostSettingsLogic {
   //   return returnValue;
   // }
 
-  Future<Map<String, String>> getPostSettings(
-    PlatformClient platformClient,
+  Future<PublishPostItem> getPublishPostItem(
     Post post,
   ) async {
-    var returnValue = Map<String, String>();
+    var publishPostItem = PublishPostItem(post);
     var postResponseModel = await platformClient.getObject<String>(
       ObjModel(
         post.fileFullNamePath,
@@ -46,18 +50,8 @@ class PostSettingsLogic {
     if (postResponseModel.isSuccess) {
       postContent = postResponseModel.message!.trim();
     }
-    returnValue.putIfAbsent(SettingsConfig.postContentKey, () => postContent);
-    returnValue.putIfAbsent(
-        SettingsConfig.postTitleKey, () => post.displayFileName);
-    returnValue.putIfAbsent(SettingsConfig.postContentLongDesKey,
-        () => getLongDesContent(postContent));
-    returnValue.putIfAbsent(SettingsConfig.postContentShortDesKey,
-        () => getShortDesContent(postContent));
-    returnValue.putIfAbsent(
-        SettingsConfig.postLinkKey, () => 'posts/${post.fileName}.html');
-    returnValue.putIfAbsent(
-        SettingsConfig.postTimeKey, () => post.lastModified);
-    return returnValue;
+    publishPostItem.content = postContent;
+    return publishPostItem;
   }
 
   String getShortDesContent(String source) {

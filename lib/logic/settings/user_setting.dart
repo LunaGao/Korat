@@ -4,19 +4,28 @@ import 'package:korat/logic/settings/base_setting_helper.dart';
 import 'package:korat/models/platform_client.dart';
 
 class UserSettingsLogic {
-  Future<String> replaceIndexTemplate(
-    String indexTemplate,
-    PlatformClient platformClient,
-  ) async {
-    var returnValue = indexTemplate;
-    var userConfigs = await BaseSettingsHelper().getConfigSettings(
-      platformClient,
+  late PlatformClient platformClient;
+  Map<String, String> configs = {};
+
+  Future<void> init(PlatformClient platformClient) async {
+    this.platformClient = platformClient;
+    this.configs = await BaseSettingsHelper().getConfigSettings(
+      this.platformClient,
       ConfigFilePath.userSettingPath,
       SettingsConfig.userConfigKeys,
     );
+  }
+
+  Future<String> replaceTemplate(
+    String templateString,
+  ) async {
+    var returnValue = templateString;
     for (String key in SettingsConfig.userConfigKeys) {
-      returnValue =
-          BaseSettingsHelper().replaceString(key, userConfigs, returnValue);
+      returnValue = BaseSettingsHelper().replaceStringWithConfigs(
+        key,
+        this.configs,
+        returnValue,
+      );
     }
     return returnValue;
   }

@@ -44,7 +44,7 @@ class BaseSettingsHelper {
     }
   }
 
-  String replaceString(
+  String replaceStringWithConfigs(
     String key,
     Map<String, String> configs,
     String source,
@@ -55,5 +55,14 @@ class BaseSettingsHelper {
       newString = configs[key]!;
     }
     return source.replaceAll(oldString, newString);
+  }
+
+  String replaceString(
+    String key,
+    String value,
+    String source,
+  ) {
+    String oldString = "@$key@";
+    return source.replaceAll(oldString, value);
   }
 }

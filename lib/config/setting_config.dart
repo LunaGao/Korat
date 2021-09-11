@@ -1,4 +1,6 @@
 class SettingsConfig {
+  static final String contentKey = 'content';
+
   static final String blogTitleKey = 'blogTitleKey';
   static final String blogDomainKey = 'blogDomainKey';
   static final String blogDetailKey = 'blogDetailKey';
@@ -30,7 +32,6 @@ class SettingsConfig {
   static final String postTitleKey = 'postTitleKey';
   static final String postContentLongDesKey = 'postContentLongDesKey';
   static final String postContentShortDesKey = 'postContentShortDesKey';
-  static final String postContentKey = 'postContentKey';
   static final String postLinkKey = 'postLinkKey';
   static final String postTimeKey = 'postTimeKey';
 
@@ -38,7 +39,6 @@ class SettingsConfig {
     postTitleKey,
     postContentLongDesKey,
     postContentShortDesKey,
-    postContentKey,
     postLinkKey,
     postTimeKey,
   ];

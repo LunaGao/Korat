@@ -1,5 +1,18 @@
-class PostTemplate {
-  String postTemplate = """
+class PostsTemplate {
+  String postItemTemplate = """
+<a href="@postLinkKey@" class="list-group-item list-group-item-action py-3 lh-tight" style="border-left: 0px; border-right: 0px;">
+    <div class="d-flex w-100 align-items-center">
+        <p class="h5">@postTitleKey@</p>
+    </div>
+<!--    <div class="d-flex w-100 align-items-center">
+        <strong class="h6">标签1</strong>
+        <strong class="h6">标签2</strong>
+    </div>  -->
+    <div class="mb-1 small">@postContentShortDesKey@</div>
+</a>
+  """;
+
+  String postsTemplate = """
 <!DOCTYPE html>
 <html lang="cn">
     <head>
@@ -8,12 +21,15 @@ class PostTemplate {
         <meta name="description" content="@blogDetailKey@">
         <meta name="author" content="@userNameKey@">
         <link rel="shortcut icon" href="@blogLogoKey@" type="image/x-icon" />
-        <title>@postTitleKey@ - @blogTitleKey@</title>
+        <title>@blogTitleKey@</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
         <style>
             hr {
                 margin-top: 1rem;
                 margin-bottom: 1rem;
+            }
+            strong {
+                margin-right: 1rem;
             }
         </style>
     </head>
@@ -27,13 +43,13 @@ class PostTemplate {
                     <div class="collapse navbar-collapse" id="navbarCollapse">
                         <ul class="navbar-nav me-aut">
                             <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="../index.html">主页</a>
+                                <a class="nav-link" aria-current="page" href="index.html">主页</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="../posts.html">帖子</a>
+                                <a class="nav-link active" aria-current="page" href="posts.html">帖子</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="../about.html">关于我</a>
+                                <a class="nav-link" aria-current="page" href="about.html">关于我</a>
                             </li>
                         </ul>
                     </div>
@@ -41,34 +57,14 @@ class PostTemplate {
             </nav>
         </header>
         <main style="margin-top: 6rem;">
-            
             <div class="container marketing">
-                <div class="p-4 p-md-5 mb-4 text-white rounded bg-danger">
-                    <div class="col-md-6 px-0">
-                        <h1 class="display-4 fst-italic">@postTitleKey@</h1>
-                        <p class="lead my-3">@postTimeKey@</p>
-                        <!-- <p class="lead mb-0"><a href="#" class="text-white fw-bold">这里放标签吧</a></p> -->
-                    </div>
-                </div>
+                
                 <div class="row g-5">
-                    
-                    <div class="col-md-9">
-
-                        @content@
-
-                        <!-- <nav class="blog-pagination" aria-label="Pagination" style="margin-top: 4rem; margin-bottom: 4rem;">
-                            <a class="btn btn-outline-primary disabled" href="#">上一页</a>
-                            <a class="btn btn-outline-primary" href="#">下一页</a>
-                        </nav> -->
-                
-                    </div>
-                
                     <div class="col-md-3">
                         <div class="position-sticky" style="top: 8rem;">
                             <div class="p-4 mb-3 bg-light rounded">
-                                <p><img class="rounded-circle" src="../@userAvatarKey@" alt="头像" style="width: 60px;"></p>
-                                <h4 class="fst-italic">@userNameKey@</h4>
-                                <p class="mb-0">@userDetailKey@</p>
+                                <h4 class="fst-italic">帖子</h4>
+                                <p class="mb-0">这里展示出了所有帖子</p>
                             </div>
                     
                             <div class="p-4">
@@ -89,6 +85,13 @@ class PostTemplate {
                                 </ol>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-md-9">
+                        @content@
+                        <!-- <nav class="blog-pagination" aria-label="Pagination" style="margin-bottom: 4rem; margin-top: 4rem;">
+                            <a class="btn btn-outline-primary disabled" href="#">上一页</a>
+                            <a class="btn btn-outline-primary" href="#">下一页</a>
+                        </nav> -->
                     </div>
                 </div>
             </div>
