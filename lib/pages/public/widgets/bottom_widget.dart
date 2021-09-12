@@ -16,7 +16,11 @@ class HomeBottomWidget extends StatelessWidget {
             LinkItem(
               "使用文档",
               "https://help.aliyun.com/product/31815.html",
-            )
+            ),
+            LinkItem(
+              "反馈列表",
+              "https://help.aliyun.com/product/31815.html",
+            ),
           ]),
           Padding(
             padding: const EdgeInsets.all(40.0),

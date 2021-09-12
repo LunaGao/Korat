@@ -7,6 +7,7 @@ import 'package:korat/pages/project/project_editor.dart';
 import 'package:korat/pages/project/project_list.dart';
 import 'package:korat/pages/public/error.dart';
 import 'package:korat/pages/public/home.dart';
+import 'package:korat/pages/public/reports.dart';
 import 'package:korat/pages/settings/project_settings.dart';
 import 'package:korat/pages/signin/signin.dart';
 import 'package:korat/pages/signup/signup.dart';
@@ -23,6 +24,7 @@ class WebRoute {
       AppRoute.project_list: (context) => ProjectListPage(),
       AppRoute.project_settings: (context) => ProjectSettingsPage(),
       AppRoute.report: (context) => ReportPage(),
+      AppRoute.publish_report: (context) => PublicReportsPage(),
     };
   }
 

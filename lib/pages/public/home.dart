@@ -34,13 +34,48 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            Text("Korat"),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed(
+                  AppRoute.home,
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: Text(
+                  "Korat",
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 30,
+            ),
             TextButton(
               onPressed: () {},
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(50, 8, 50, 8),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
                 child: Text(
                   "使用文档",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed(
+                  AppRoute.publish_report,
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: Text(
+                  "反馈列表",
                   style: TextStyle(
                     color: Colors.white,
                   ),
@@ -182,7 +217,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 Text(
-                  '均存储在【对象存储】空间中',
+                  '均存储在 您自己的【对象存储】空间中',
                   style: TextStyle(
                     fontSize: 40,
                   ),

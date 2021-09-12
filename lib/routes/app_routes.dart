@@ -41,6 +41,7 @@ class AppRoute {
   static const String signin = '/signin';
   static const String signup = '/signup';
   static const String dashboard = '/dashboard';
+  static const String publish_report = '/publish_report';
   static const String project_editor = '/project_editor';
   static const String project_list = '/project_list';
   static const String project_settings = '/project_settings';
