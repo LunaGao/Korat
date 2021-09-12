@@ -16,7 +16,7 @@ class AliyunOSSClient extends PlatformClient {
   late String baseUrl;
 
   AliyunOSSClient(this.projectModel) {
-    this.baseUrl = "http://${projectModel.bucket}.${projectModel.endPoint}/";
+    this.baseUrl = "https://${projectModel.bucket}.${projectModel.endPoint}/";
   }
 
   @override
