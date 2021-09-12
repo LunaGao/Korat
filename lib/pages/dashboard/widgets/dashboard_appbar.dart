@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/base_model/user.dart';
 import 'package:korat/common/global.dart';
 import 'package:korat/models/project.dart';
@@ -121,15 +122,33 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
       actions: [
         TextButton(
           onPressed: () {
+            Navigator.of(context).pushNamed(AppRoute.report).then((value) {
+              EasyLoading.showSuccess(
+                "感谢您的宝贵意见",
+              );
+            });
+          },
+          child: Text(
+            "反馈、意见、Bug提交",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
             SharedPreferences.getInstance().then((prefs) async {
               await Global.logout();
               Navigator.of(context).pushReplacementNamed(AppRoute.home);
             });
           },
-          child: Text(
-            "退出",
-            style: TextStyle(
-              color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(40, 8, 8, 8),
+            child: Text(
+              "退出",
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
           ),
         ),

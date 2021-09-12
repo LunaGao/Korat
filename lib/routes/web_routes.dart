@@ -1,5 +1,8 @@
+import 'dart:js';
+
 import 'package:flutter/material.dart';
 import 'package:korat/pages/dashboard/dashboard.dart';
+import 'package:korat/pages/dashboard/report.dart';
 import 'package:korat/pages/project/project_editor.dart';
 import 'package:korat/pages/project/project_list.dart';
 import 'package:korat/pages/public/error.dart';
@@ -19,6 +22,7 @@ class WebRoute {
       AppRoute.project_editor: (context) => ProjectEditorPage(),
       AppRoute.project_list: (context) => ProjectListPage(),
       AppRoute.project_settings: (context) => ProjectSettingsPage(),
+      AppRoute.report: (context) => ReportPage(),
     };
   }
 

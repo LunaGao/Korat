@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeBottomWidget extends StatelessWidget {
   const HomeBottomWidget({Key? key}) : super(key: key);
@@ -13,7 +14,7 @@ class HomeBottomWidget extends StatelessWidget {
         children: [
           bottomGroup('关于', [
             LinkItem(
-              "阿里云对象存储OSS",
+              "使用文档",
               "https://help.aliyun.com/product/31815.html",
             )
           ]),
@@ -29,6 +30,12 @@ class HomeBottomWidget extends StatelessWidget {
               "https://help.aliyun.com/product/31815.html",
             )
           ]),
+          Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: VerticalDivider(
+              color: Colors.grey,
+            ),
+          ),
         ],
       ),
     );
@@ -46,12 +53,12 @@ class HomeBottomWidget extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 18,
               color: Colors.white,
             ),
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           ...groupList(lists),
         ],
@@ -63,11 +70,18 @@ class HomeBottomWidget extends StatelessWidget {
     List<Widget> returnValue = [];
     for (LinkItem item in lists) {
       returnValue.add(
-        Text(
-          item.displayTitle,
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.grey,
+        TextButton(
+          onPressed: () async {
+            await canLaunch(item.url)
+                ? await launch(item.url)
+                : throw 'Could not launch ${item.url}';
+          },
+          child: Text(
+            item.displayTitle,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
           ),
         ),
       );

@@ -96,7 +96,7 @@ class _EditorWidgetState extends State<EditorWidget> {
                         isCollapsed: true,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
       ),

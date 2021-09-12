@@ -35,6 +35,18 @@ class _HomePageState extends State<HomePage> {
         title: Row(
           children: [
             Text("Korat"),
+            TextButton(
+              onPressed: () {},
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(50, 8, 50, 8),
+                child: Text(
+                  "使用文档",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -71,7 +83,8 @@ class _HomePageState extends State<HomePage> {
           isUserSignin
               ? TextButton(
                   onPressed: () {
-                    Navigator.of(context).pushNamed(AppRoute.dashboard);
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoute.dashboard);
                   },
                   child: Text(
                     "控制台",

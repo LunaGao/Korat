@@ -44,4 +44,5 @@ class AppRoute {
   static const String project_editor = '/project_editor';
   static const String project_list = '/project_list';
   static const String project_settings = '/project_settings';
+  static const String report = '/report';
 }
