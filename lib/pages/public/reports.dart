@@ -162,8 +162,16 @@ class _PublicReportsPageState extends State<PublicReportsPage> {
                                   Icons.error,
                                   color: Colors.red,
                                 ),
-                          title: Text(
-                            reports[index].value,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                reports[index].value,
+                              ),
+                              Text(
+                                reports[index].answer,
+                              ),
+                            ],
                           ),
                         );
                       },
