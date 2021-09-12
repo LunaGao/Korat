@@ -12,10 +12,25 @@ class Global {
 
     var meResponse = await UserApi().me();
     if (!meResponse.isSuccess) {
-      _prefs!.remove('sessionToken');
+      await _prefs!.remove('sessionToken');
     } else {
       _user = meResponse.message!;
     }
+  }
+
+  static Future signin(String sessionToken) async {
+    await _prefs!.setString('sessionToken', sessionToken);
+    var meResponse = await UserApi().me();
+    if (!meResponse.isSuccess) {
+      await _prefs!.remove('sessionToken');
+    } else {
+      _user = meResponse.message!;
+    }
+  }
+
+  static Future logout() async {
+    await _prefs!.remove('sessionToken');
+    _user = null;
   }
 
   // // 持久化Profile信息

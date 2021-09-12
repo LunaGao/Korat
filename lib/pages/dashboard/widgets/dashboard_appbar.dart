@@ -121,9 +121,8 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
       actions: [
         TextButton(
           onPressed: () {
-            SharedPreferences.getInstance().then((prefs) {
-              prefs.remove('sessionToken');
-              prefs.remove('currentUserId');
+            SharedPreferences.getInstance().then((prefs) async {
+              await Global.logout();
               Navigator.of(context).pushReplacementNamed(AppRoute.home);
             });
           },

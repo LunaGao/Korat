@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/leancloud/user_api.dart';
+import 'package:korat/common/global.dart';
 import 'package:korat/routes/app_routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -15,6 +15,20 @@ class _SignInPageState extends State<SignInPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String email = "";
   String password = "";
+
+  signIn() async {
+    await EasyLoading.show(status: '请求中...');
+    var value = await UserApi().signin(email, password);
+    await EasyLoading.dismiss();
+    if (value.isSuccess) {
+      await Global.signin(
+        value.message['sessionToken'],
+      );
+      Navigator.of(context).pop();
+    } else {
+      await EasyLoading.showError(value.errorMessage);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,22 +78,7 @@ class _SignInPageState extends State<SignInPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        EasyLoading.show(status: '请求中...');
-                        UserApi().signin(email, password).then((value) async {
-                          EasyLoading.dismiss();
-                          if (value.isSuccess) {
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
-                            prefs.setString(
-                                'sessionToken', value.message['sessionToken']);
-                            prefs.setString(
-                                'currentUserId', value.message['objectId']);
-                            Navigator.of(context)
-                                .pushReplacementNamed(AppRoute.dashboard);
-                          } else {
-                            EasyLoading.showError(value.errorMessage);
-                          }
-                        });
+                        this.signIn();
                       }
                     },
                     child: const Text(
