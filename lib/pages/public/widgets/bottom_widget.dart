@@ -21,6 +21,10 @@ class HomeBottomWidget extends StatelessWidget {
               "反馈列表",
               "https://help.aliyun.com/product/31815.html",
             ),
+            LinkItem(
+              "开源地址",
+              "https://github.com/LunaGao/Korat",
+            ),
           ]),
           Padding(
             padding: const EdgeInsets.all(40.0),
@@ -53,6 +57,7 @@ class HomeBottomWidget extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 50, 40, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Text(
             title,
@@ -74,17 +79,24 @@ class HomeBottomWidget extends StatelessWidget {
     List<Widget> returnValue = [];
     for (LinkItem item in lists) {
       returnValue.add(
-        TextButton(
-          onPressed: () async {
-            await canLaunch(item.url)
-                ? await launch(item.url)
-                : throw 'Could not launch ${item.url}';
-          },
-          child: Text(
-            item.displayTitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
+        Container(
+          height: 22,
+          child: TextButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(Size(1, 1)),
+              padding: MaterialStateProperty.all(EdgeInsets.zero),
+            ),
+            onPressed: () async {
+              await canLaunch(item.url)
+                  ? await launch(item.url)
+                  : throw 'Could not launch ${item.url}';
+            },
+            child: Text(
+              item.displayTitle,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
             ),
           ),
         ),
