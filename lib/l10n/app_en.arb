@@ -1,0 +1,6 @@
+{
+    "signin_button": "SIGN IN",
+    "@signin_button": {
+      "description": "The conventional newborn programmer greeting"
+    }
+}

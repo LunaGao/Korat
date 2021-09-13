@@ -44,6 +44,14 @@ class HomeBottomWidget extends StatelessWidget {
               color: Colors.grey,
             ),
           ),
+          bottomGroup('更多', [
+            LinkItem(
+              Uri.base.toString().contains("korat.work") ? "中文" : "English",
+              Uri.base.toString().contains("korat.work")
+                  ? "https://korat.fun"
+                  : "https://korat.work",
+            )
+          ]),
         ],
       ),
     );

@@ -1,0 +1,6 @@
+{
+    "signin_button": "登录",
+    "@signin_button": {
+      "description": "主页登录按钮"
+    }
+}

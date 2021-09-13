@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:korat/common/global.dart';
 import 'package:korat/pages/public/widgets/bottom_widget.dart';
 import 'package:korat/routes/app_routes.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -109,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                         .then((value) => updateUI());
                   },
                   child: Text(
-                    "登录",
+                    AppLocalizations.of(context)!.signin_button,
                     style: TextStyle(
                       color: Colors.white,
                     ),
