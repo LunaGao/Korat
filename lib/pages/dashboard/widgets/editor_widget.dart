@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/content_type_config.dart';
+import 'package:korat/logic/editor/bold_logic.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post_item.dart';
 import 'package:korat/models/project.dart';
@@ -19,6 +20,8 @@ class EditorWidget extends StatefulWidget {
 
 class _EditorWidgetState extends State<EditorWidget> {
   TextEditingController textEditingController = TextEditingController();
+  FocusNode _focusNode = FocusNode();
+  TextSelection? textSelection;
   bool showWelcomePage = true;
 
   @override
@@ -32,6 +35,11 @@ class _EditorWidgetState extends State<EditorWidget> {
       setState(() {
         showWelcomePage = widget.editorController.getShowWelcomePage();
       });
+    });
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        textSelection = textEditingController.selection;
+      }
     });
   }
 
@@ -86,6 +94,8 @@ class _EditorWidgetState extends State<EditorWidget> {
                   ),
                   Expanded(
                     child: TextField(
+                      focusNode: _focusNode,
+                      autofocus: true,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       controller: textEditingController,
@@ -112,13 +122,17 @@ class _EditorWidgetState extends State<EditorWidget> {
         alignment: WrapAlignment.start,
         children: [
           IconButton(
-            onPressed: () {},
+            focusNode: null,
+            onPressed: () {
+              BoldLogic().bold(textEditingController, textSelection);
+            },
             tooltip: "加粗",
             icon: Icon(
               Icons.format_bold_outlined,
             ),
           ),
           IconButton(
+            focusNode: null,
             onPressed: () {},
             icon: Icon(
               Icons.format_italic_outlined,

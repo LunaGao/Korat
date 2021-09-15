@@ -179,54 +179,18 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        Container(
-          height: 300,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '只需要一个域名',
-                  style: TextStyle(
-                    fontSize: 40,
-                  ),
-                ),
-                Text(
-                  '您就可以轻松的创建一个完全属于您自己的博客',
-                  style: TextStyle(
-                    fontSize: 40,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        itemContent([
+          '只需要一个域名',
+          '您就可以轻松的创建一个完全属于您自己的博客',
+        ]),
         Padding(
           padding: const EdgeInsets.all(40.0),
           child: Divider(),
         ),
-        Container(
-          height: 300,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '所有的博客数据',
-                  style: TextStyle(
-                    fontSize: 40,
-                  ),
-                ),
-                Text(
-                  '均存储在 您自己的【对象存储】空间中',
-                  style: TextStyle(
-                    fontSize: 40,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        itemContent([
+          '所有的博客数据',
+          '均存储在 您自己的【对象存储】空间中',
+        ]),
         Padding(
           padding: const EdgeInsets.all(40.0),
           child: Divider(),
@@ -287,6 +251,25 @@ class _HomePageState extends State<HomePage> {
         ),
         HomeBottomWidget(),
       ],
+    );
+  }
+
+  Widget itemContent(List<String> values) {
+    return Container(
+      height: 300,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: values.map((e) {
+            return Text(
+              e,
+              style: TextStyle(
+                fontSize: 40,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

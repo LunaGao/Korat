@@ -2,10 +2,10 @@ import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/content_type_config.dart';
 import 'package:korat/config/setting_config.dart';
 import 'package:korat/config/templates/posts_template.dart';
-import 'package:korat/logic/settings/base_setting_helper.dart';
-import 'package:korat/logic/settings/blog_setting.dart';
-import 'package:korat/logic/settings/post_setting.dart';
-import 'package:korat/logic/settings/user_setting.dart';
+import 'package:korat/logic/publish/settings/base_setting_helper.dart';
+import 'package:korat/logic/publish/settings/blog_setting.dart';
+import 'package:korat/logic/publish/settings/post_setting.dart';
+import 'package:korat/logic/publish/settings/user_setting.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/publish_post_item.dart';
 

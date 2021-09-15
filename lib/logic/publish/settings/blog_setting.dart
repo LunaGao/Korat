@@ -1,8 +1,8 @@
 import 'package:korat/config/config_file_path.dart';
 import 'package:korat/config/setting_config.dart';
 import 'package:korat/config/templates/index_template.dart';
-import 'package:korat/logic/settings/base_setting_helper.dart';
-import 'package:korat/logic/settings/post_setting.dart';
+import 'package:korat/logic/publish/settings/base_setting_helper.dart';
+import 'package:korat/logic/publish/settings/post_setting.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/publish_post_item.dart';
 

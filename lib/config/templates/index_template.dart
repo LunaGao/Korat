@@ -90,9 +90,9 @@ class IndexTemplate {
                             <h5>关于</h5>
                             <ul class="list-unstyled text-small">
                                 <li><a class="link-secondary" href="https://getbootstrap.com/">Power by Bootstrap</a></li>
-                                <li><a class="link-secondary" href="#">Generated from Korat</a></li>
+                                <li><a class="link-secondary" href="https://korat.work">Generated from Korat</a></li>
                                 <li><a class="link-secondary" href="#">@blogCopyrightKey@</a></li>
-                                <li><p class="text-secondary">@blogRecordKey@</p></li>
+                                <li><a class="link-secondary" href="https://beian.miit.gov.cn">@blogRecordKey@</a></li>
                             </ul>
                         </div>
                         <div class="vr" style="width: 1px; padding: 0; margin-left: 4rem; margin-right: 2rem;"></div>

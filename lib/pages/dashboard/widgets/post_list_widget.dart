@@ -7,7 +7,7 @@ import 'package:korat/api/base_model/response_model.dart';
 import 'package:korat/api/platforms/model/object_model.dart';
 import 'package:korat/config/config_file_path.dart';
 import 'package:korat/config/content_type_config.dart';
-import 'package:korat/logic/publish_client.dart';
+import 'package:korat/logic/publish/publish_client.dart';
 import 'package:korat/models/platform_client.dart';
 import 'package:korat/models/post.dart';
 import 'package:korat/models/post_config.dart';

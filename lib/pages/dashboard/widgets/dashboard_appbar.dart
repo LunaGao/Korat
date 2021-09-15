@@ -118,7 +118,6 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
           ),
         ],
       ),
-      backwardsCompatibility: false,
       actions: [
         TextButton(
           onPressed: () {
